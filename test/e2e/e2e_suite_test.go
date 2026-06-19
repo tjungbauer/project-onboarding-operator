@@ -33,9 +33,9 @@ import (
 var (
 	// Optional Environment Variables:
 	// - CERT_MANAGER_INSTALL_SKIP=true: Skips CertManager installation during test setup.
-	// These variables are useful if CertManager is already installed, avoiding
-	// re-installation and conflicts.
+	// - E2E_SKIP_IMAGE_BUILD=true: Skips manager/curl image build and Kind load (CI preloads images).
 	skipCertManagerInstall = os.Getenv("CERT_MANAGER_INSTALL_SKIP") == "true"
+	skipE2EImageBuild      = os.Getenv("E2E_SKIP_IMAGE_BUILD") == "true"
 	// isCertManagerAlreadyInstalled will be set true when CertManager CRDs be found on the cluster
 	isCertManagerAlreadyInstalled = false
 
@@ -72,19 +72,23 @@ var _ = BeforeSuite(func() {
 		return
 	}
 
-	By("building the manager(Operator) image")
-	cmd := exec.Command("make", "docker-build", fmt.Sprintf("IMG=%s", projectImage))
-	_, err := utils.Run(cmd)
-	ExpectWithOffset(1, err).NotTo(HaveOccurred(), "Failed to build the manager(Operator) image")
+	if skipE2EImageBuild {
+		_, _ = fmt.Fprintf(GinkgoWriter, "E2E_SKIP_IMAGE_BUILD=true: skipping manager/curl image build and Kind load\n")
+	} else {
+		By("building the manager(Operator) image")
+		cmd := exec.Command("make", "docker-build", fmt.Sprintf("IMG=%s", projectImage))
+		_, err := utils.Run(cmd)
+		ExpectWithOffset(1, err).NotTo(HaveOccurred(), "Failed to build the manager(Operator) image")
 
-	By("loading the manager(Operator) image on Kind")
-	err = utils.LoadImageToKindClusterWithName(projectImage)
-	ExpectWithOffset(1, err).NotTo(HaveOccurred(), "Failed to load the manager(Operator) image into Kind")
+		By("loading the manager(Operator) image on Kind")
+		err = utils.LoadImageToKindClusterWithName(projectImage)
+		ExpectWithOffset(1, err).NotTo(HaveOccurred(), "Failed to load the manager(Operator) image into Kind")
 
-	By("loading the curl E2E image on Kind")
-	ExpectWithOffset(1, utils.EnsureContainerImage(curlE2EImage)).To(Succeed(), "Failed to pull curl E2E image")
-	err = utils.LoadImageToKindClusterWithName(curlE2EImage)
-	ExpectWithOffset(1, err).NotTo(HaveOccurred(), "Failed to load the curl E2E image into Kind")
+		By("loading the curl E2E image on Kind")
+		ExpectWithOffset(1, utils.EnsureContainerImage(curlE2EImage)).To(Succeed(), "Failed to pull curl E2E image")
+		err = utils.LoadImageToKindClusterWithName(curlE2EImage)
+		ExpectWithOffset(1, err).NotTo(HaveOccurred(), "Failed to load the curl E2E image into Kind")
+	}
 
 	// The tests-e2e are intended to run on a temporary cluster that is created and destroyed for testing.
 	// To prevent errors when tests run in environments with CertManager already installed,

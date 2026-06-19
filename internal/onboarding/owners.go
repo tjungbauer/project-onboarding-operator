@@ -17,8 +17,6 @@ limitations under the License.
 package onboarding
 
 import (
-	"context"
-
 	onboardingv1beta1 "github.com/tjungbauer/project-onboarding-operator/api/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -35,14 +33,6 @@ func IsManagedResource(obj client.Object) bool {
 	}
 	return labels[onboardingv1beta1.ProjectOnboardingManagedByKey] == onboardingv1beta1.ProjectOnboardingManagedByVal &&
 		labels[onboardingv1beta1.ProjectOnboardingLabelKey] != ""
-}
-
-func getTenantNamespace(ctx context.Context, c client.Client, nsName string) (*corev1.Namespace, error) {
-	ns := &corev1.Namespace{}
-	if err := c.Get(ctx, client.ObjectKey{Name: nsName}, ns); err != nil {
-		return nil, err
-	}
-	return ns, nil
 }
 
 func ensureProjectOnboardingControllerRef(scheme *runtime.Scheme, po *onboardingv1beta1.ProjectOnboarding, obj metav1.Object) error {

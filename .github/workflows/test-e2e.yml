@@ -26,7 +26,30 @@ jobs:
       - name: Verify kind installation
         run: kind version
 
-      - name: Running Test e2e
+      - name: Prepare Kind E2E environment
+        env:
+          CONTAINER_TOOL: docker
         run: |
           go mod tidy
-          make test-e2e
+          make setup-test-e2e
+          VERSION="$(tr -d ' \n\r' < VERSION)"
+          IMG="example.com/project-onboarding-operator:v${VERSION}"
+          docker build -t "${IMG}" .
+          kind load docker-image "${IMG}" --name project-onboarding-operator-test-e2e
+          docker pull curlimages/curl:8.12.1
+          kind load docker-image curlimages/curl:8.12.1 --name project-onboarding-operator-test-e2e
+          kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.16.3/cert-manager.yaml
+          kubectl wait --for=condition=Available -n cert-manager deployment --all --timeout=300s
+
+      - name: Running Test e2e
+        env:
+          CERT_MANAGER_INSTALL_SKIP: "true"
+          E2E_SKIP_IMAGE_BUILD: "true"
+          CONTAINER_TOOL: docker
+          KIND_CLUSTER: project-onboarding-operator-test-e2e
+        run: |
+          go test ./test/e2e/ -v -ginkgo.v -timeout 30m -ginkgo.skip="OpenShift test cases"
+
+      - name: Tear down Kind cluster
+        if: always()
+        run: make cleanup-test-e2e

@@ -25,12 +25,12 @@ import (
 func TestApplyUserMonitoringLabelExplicitFalse(t *testing.T) {
 	t.Parallel()
 
-	labels := map[string]string{"openshift.io/user-monitoring": "true"}
+	labels := map[string]string{"openshift.io/user-monitoring": labelValueTrue}
 	disabled := false
 	ApplyUserMonitoringLabel(labels, &onboardingv1beta1.AdditionalSettingsSpec{
 		EnableClusterMonitoring: &disabled,
 	})
-	if labels["openshift.io/user-monitoring"] != "false" {
+	if labels["openshift.io/user-monitoring"] != labelValueFalse {
 		t.Fatalf("expected user-monitoring=false when disabled, got %q", labels["openshift.io/user-monitoring"])
 	}
 }
@@ -43,7 +43,7 @@ func TestApplyUserMonitoringLabelExplicitTrue(t *testing.T) {
 	ApplyUserMonitoringLabel(labels, &onboardingv1beta1.AdditionalSettingsSpec{
 		EnableClusterMonitoring: &enabled,
 	})
-	if labels["openshift.io/user-monitoring"] != "true" {
+	if labels["openshift.io/user-monitoring"] != labelValueTrue {
 		t.Fatalf("expected user-monitoring=true when enabled, got %q", labels["openshift.io/user-monitoring"])
 	}
 }

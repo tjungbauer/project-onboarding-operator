@@ -20,14 +20,19 @@ import onboardingv1beta1 "github.com/tjungbauer/project-onboarding-operator/api/
 
 const userMonitoringLabel = "openshift.io/user-monitoring"
 
+const (
+	labelValueTrue  = "true"
+	labelValueFalse = "false"
+)
+
 // ApplyUserMonitoringLabel sets openshift.io/user-monitoring on the tenant namespace.
 // User workload monitoring is enabled by default (opt-out): nil or true sets "true";
 // explicit false sets "false" rather than removing the label, because an absent label
 // would opt back in to the OpenShift default (true).
 func ApplyUserMonitoringLabel(labels map[string]string, settings *onboardingv1beta1.AdditionalSettingsSpec) {
 	if settings == nil || settings.EnableClusterMonitoring == nil || *settings.EnableClusterMonitoring {
-		labels[userMonitoringLabel] = "true"
+		labels[userMonitoringLabel] = labelValueTrue
 		return
 	}
-	labels[userMonitoringLabel] = "false"
+	labels[userMonitoringLabel] = labelValueFalse
 }

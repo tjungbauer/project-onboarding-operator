@@ -25,8 +25,8 @@ import (
 	"strings"
 	"time"
 
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
+	. "github.com/onsi/ginkgo/v2" // nolint:revive,staticcheck
+	. "github.com/onsi/gomega"    // nolint:revive,staticcheck
 
 	"github.com/tjungbauer/project-onboarding-operator/test/utils"
 )
@@ -34,10 +34,11 @@ import (
 const (
 	envOpenShiftE2E = "OPENSHIFT_E2E"
 	envOperatorNS   = "OPERATOR_NS"
+	envValueTrue    = "true"
 )
 
 func openshiftE2EEnabled() bool {
-	return os.Getenv(envOpenShiftE2E) == "true"
+	return os.Getenv(envOpenShiftE2E) == envValueTrue
 }
 
 func operatorNamespace() string {
@@ -89,12 +90,13 @@ func kubectlDeleteDryRunShouldFail(args ...string) {
 	ExpectWithOffset(1, err).To(HaveOccurred())
 }
 
-func waitProjectOnboardingReady(name string, timeout time.Duration) {
+func waitProjectOnboardingReady(name string) {
+	const readyTimeout = 3 * time.Minute
 	Eventually(func(g Gomega) {
 		out, err := kubectlOutput("get", "projectonboarding", name, "-o", "jsonpath={.status.phase}")
 		g.Expect(err).NotTo(HaveOccurred())
 		g.Expect(out).To(Equal("Ready"))
-	}, timeout, time.Second).Should(Succeed())
+	}, readyTimeout, time.Second).Should(Succeed())
 }
 
 func waitTShirtSizeReady(name string, timeout time.Duration) {
@@ -113,7 +115,10 @@ func waitNamespaceDeleted(name string, timeout time.Duration) {
 }
 
 func networkPolicyNames(namespace string) []string {
-	out, err := kubectlOutput("get", "networkpolicy", "-n", namespace, "-o", "jsonpath={range .items[*]}{.metadata.name}{\"\\n\"}{end}")
+	out, err := kubectlOutput(
+		"get", "networkpolicy", "-n", namespace,
+		"-o", "jsonpath={range .items[*]}{.metadata.name}{\"\\n\"}{end}",
+	)
 	Expect(err).NotTo(HaveOccurred())
 	names := utils.GetNonEmptyLines(out)
 	sort.Strings(names)

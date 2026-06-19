@@ -35,6 +35,9 @@ const (
 
 	certmanagerVersion = "v1.16.3"
 	certmanagerURLTmpl = "https://github.com/cert-manager/cert-manager/releases/download/%s/cert-manager.yaml"
+
+	containerToolDocker = "docker"
+	containerToolPodman = "podman"
 )
 
 func warnError(err error) {
@@ -208,9 +211,9 @@ func EnsureContainerImage(name string) error {
 	containerTool := os.Getenv("CONTAINER_TOOL")
 	if containerTool == "" {
 		if _, err := exec.LookPath("docker"); err == nil {
-			containerTool = "docker"
+			containerTool = containerToolDocker
 		} else if _, err := exec.LookPath("podman"); err == nil {
-			containerTool = "podman"
+			containerTool = containerToolPodman
 		} else {
 			return fmt.Errorf("no container tool found (docker or podman)")
 		}
@@ -240,13 +243,13 @@ func LoadImageToKindClusterWithName(name string) error {
 	containerTool := os.Getenv("CONTAINER_TOOL")
 	if containerTool == "" {
 		if _, err := exec.LookPath("docker"); err == nil {
-			containerTool = "docker"
+			containerTool = containerToolDocker
 		} else if _, err := exec.LookPath("podman"); err == nil {
-			containerTool = "podman"
+			containerTool = containerToolPodman
 		}
 	}
 
-	if containerTool == "podman" {
+	if containerTool == containerToolPodman {
 		tmp, err := os.CreateTemp("", "kind-image-*.tar")
 		if err != nil {
 			return fmt.Errorf("create temp archive: %w", err)

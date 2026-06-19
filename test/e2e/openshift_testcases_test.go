@@ -78,7 +78,10 @@ var _ = Describe("OpenShift test cases", Ordered, func() {
 		ns := operatorNamespace()
 
 		By("checking CSV phase")
-		out, err := kubectlOutput("get", "csv", "-n", ns, "-o", "jsonpath={range .items[*]}{.metadata.name}{\" \"}{.status.phase}{\"\\n\"}{end}")
+		out, err := kubectlOutput(
+			"get", "csv", "-n", ns,
+			"-o", "jsonpath={range .items[*]}{.metadata.name}{\" \"}{.status.phase}{\"\\n\"}{end}",
+		)
 		Expect(err).NotTo(HaveOccurred())
 		Expect(out).To(ContainSubstring("Succeeded"))
 
@@ -114,7 +117,7 @@ var _ = Describe("OpenShift test cases", Ordered, func() {
 
 	It("TC-01 should reconcile core onboarding resources", func() {
 		kubectlApplyFile(openshiftManifest(manifestTC01))
-		waitProjectOnboardingReady(crTC01, 3*time.Minute)
+		waitProjectOnboardingReady(crTC01)
 
 		out, err := kubectlOutput("get", "projectonboarding", crTC01, "-o", "jsonpath={.apiVersion}")
 		Expect(err).NotTo(HaveOccurred())
@@ -157,7 +160,7 @@ var _ = Describe("OpenShift test cases", Ordered, func() {
 
 	It("TC-03 should merge T-shirt sizing with overwriteTshirt", func() {
 		kubectlApplyFile(openshiftManifest(manifestTC03))
-		waitProjectOnboardingReady(crTC03, 3*time.Minute)
+		waitProjectOnboardingReady(crTC03)
 
 		out, err := kubectlOutput("get", "namespace", nsTC03, "-o", "jsonpath={.metadata.labels.namespace-size}")
 		Expect(err).NotTo(HaveOccurred())
@@ -178,7 +181,7 @@ var _ = Describe("OpenShift test cases", Ordered, func() {
 
 	It("TC-04 should reconcile OpenShift Group, RoleBinding, and EgressIP", func() {
 		kubectlApplyFile(openshiftManifest(manifestTC04))
-		waitProjectOnboardingReady(crTC04, 3*time.Minute)
+		waitProjectOnboardingReady(crTC04)
 
 		_, err := kubectlOutput("get", "group", nsTC04+"-admins")
 		Expect(err).NotTo(HaveOccurred())
@@ -198,7 +201,7 @@ var _ = Describe("OpenShift test cases", Ordered, func() {
 
 	It("TC-05 should reconcile custom NetworkPolicy", func() {
 		kubectlApplyFile(openshiftManifest(manifestTC05))
-		waitProjectOnboardingReady(crTC05, 3*time.Minute)
+		waitProjectOnboardingReady(crTC05)
 
 		out, err := kubectlOutput("get", "networkpolicy", "allow-from-openshift-monitoring-custom", "-n", nsTC05,
 			"-o", "jsonpath={.spec.podSelector.matchLabels.app}")
@@ -244,7 +247,7 @@ spec:
 	})
 
 	It("TC-10 should restore drifted ResourceQuota", func() {
-		waitProjectOnboardingReady(crTC03, 3*time.Minute)
+		waitProjectOnboardingReady(crTC03)
 		_, err := kubectlOutput("get", "resourcequota", nsTC03+"-quota", "-n", nsTC03)
 		Expect(err).NotTo(HaveOccurred())
 
@@ -276,7 +279,7 @@ spec:
 
 	It("TC-12 should convert v1alpha1 apply to v1beta1 storage", func() {
 		kubectlApplyFile(openshiftManifest(manifestTC12))
-		waitProjectOnboardingReady(crTC12, 3*time.Minute)
+		waitProjectOnboardingReady(crTC12)
 
 		out, err := kubectlOutput("get", "projectonboarding", crTC12, "-o", "jsonpath={.apiVersion}")
 		Expect(err).NotTo(HaveOccurred())
@@ -303,7 +306,7 @@ spec:
 		ensureNamespace(argoNS)
 
 		kubectlApplyFile(openshiftManifest(manifestTC13))
-		waitProjectOnboardingReady(crTC13, 3*time.Minute)
+		waitProjectOnboardingReady(crTC13)
 
 		out, err := kubectlOutput("get", "namespace", nsTC13,
 			"-o", "jsonpath={.metadata.labels.argocd\\.argoproj\\.io/managed-by}")

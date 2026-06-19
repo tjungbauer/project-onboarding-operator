@@ -11,23 +11,39 @@ jobs:
   openshift-e2e:
     name: OpenShift test cases (TC-00–TC-14)
     runs-on: ubuntu-latest
-    if: ${{ secrets.OPENSHIFT_KUBECONFIG != '' }}
     steps:
       - name: Clone the code
         uses: actions/checkout@v4
 
+      - name: Check OpenShift kubeconfig secret
+        id: openshift
+        env:
+          KUBECONFIG_B64: ${{ secrets.OPENSHIFT_KUBECONFIG }}
+        run: |
+          if [ -z "${KUBECONFIG_B64}" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "OPENSHIFT_KUBECONFIG secret not configured; skipping OpenShift E2E"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Setup Go
+        if: steps.openshift.outputs.skip != 'true'
         uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
 
       - name: Configure kubeconfig
+        if: steps.openshift.outputs.skip != 'true'
+        env:
+          KUBECONFIG_B64: ${{ secrets.OPENSHIFT_KUBECONFIG }}
         run: |
           mkdir -p ~/.kube
-          echo "${{ secrets.OPENSHIFT_KUBECONFIG }}" | base64 -d > ~/.kube/config
+          echo "${KUBECONFIG_B64}" | base64 -d > ~/.kube/config
           kubectl cluster-info
 
       - name: Run OpenShift E2E
+        if: steps.openshift.outputs.skip != 'true'
         env:
           OPENSHIFT_E2E: "true"
           OPERATOR_NS: project-onboarding-operator

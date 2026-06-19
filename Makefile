@@ -330,6 +330,7 @@ bundle: generate-csv-icon manifests kustomize operator-sdk ## Generate bundle ma
 	cd config/manager && $(KUSTOMIZE) edit set image controller=$(IMG)
 	$(KUSTOMIZE) build config/manifests --load-restrictor LoadRestrictionsNone | $(OPERATOR_SDK) generate bundle $(BUNDLE_GEN_FLAGS)
 	python3 scripts/patch-csv-spec-descriptors.py
+	python3 scripts/pin-bundle-created-at.py
 	@rm -f bundle/manifests/controller-manager-metrics-monitor_monitoring.coreos.com_v1_servicemonitor.yaml
 	@if [ -n "$(PREV_VERSION)" ]; then \
 		$(KUSTOMIZE) version --short 2>/dev/null | grep -q v5 || true; \

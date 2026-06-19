@@ -22,8 +22,6 @@ import (
 	"k8s.io/client-go/tools/record"
 )
 
-const eventComponent = "project-onboarding-operator"
-
 func recordWarning(recorder record.EventRecorder, obj runtime.Object, reason, message string) {
 	if recorder == nil {
 		return

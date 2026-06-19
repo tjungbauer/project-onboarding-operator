@@ -8,6 +8,10 @@ All notable changes to this project are documented here. Version numbers match O
 
 - Namespace reconcile: reuse the namespace object from create/patch instead of a second cache read, avoiding a transient `Namespace not found` error on new tenants when the informer has not caught up yet.
 
+### Changed
+
+- CI: pin bundle CSV `createdAt` for reproducible OLM bundle checks; fix Trivy action version; Kind E2E preloads images in workflow; OpenShift E2E skips cleanly when kubeconfig secret is missing; reduce Dependabot PR limit.
+
 ## [0.0.44] - 2026-06-19
 
 ### Changed

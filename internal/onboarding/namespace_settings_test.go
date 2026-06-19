@@ -48,7 +48,7 @@ func TestApplyAdditionalSettingsLabelsCustomAndPodSecurity(t *testing.T) {
 	if labels[podSecurityAuditLabel] != "privileged" {
 		t.Fatalf("expected audit=privileged, got %q", labels[podSecurityAuditLabel])
 	}
-	if labels["openshift.io/user-monitoring"] != "true" {
+	if labels["openshift.io/user-monitoring"] != labelValueTrue {
 		t.Fatalf("expected user-monitoring default true when enableClusterMonitoring is omitted, got %q", labels["openshift.io/user-monitoring"])
 	}
 }
@@ -58,7 +58,7 @@ func TestApplyAdditionalSettingsLabelsNilUsesMonitoringDefault(t *testing.T) {
 
 	labels := map[string]string{}
 	ApplyAdditionalSettingsLabels(labels, nil)
-	if labels["openshift.io/user-monitoring"] != "true" {
+	if labels["openshift.io/user-monitoring"] != labelValueTrue {
 		t.Fatalf("expected user-monitoring default true, got %v", labels["openshift.io/user-monitoring"])
 	}
 }
