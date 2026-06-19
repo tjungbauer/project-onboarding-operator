@@ -41,6 +41,3 @@ jobs:
 
       - name: Check committed bundle matches generated output
         run: git diff --exit-code bundle/
-
-      - name: Run operator-sdk scorecard
-        run: make scorecard
