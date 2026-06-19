@@ -88,11 +88,8 @@ for ref in "${IMAGES[@]}"; do
     cosign_sign "${ref}"
     if [[ "${SKIP_SBOM}" != "true" && -f "${sbom_file}" ]]; then
       echo "    cosign attach sbom"
-      attach_flags=()
-      if [[ "${COSIGN_YES}" == "true" ]]; then
-        attach_flags=(--yes)
-      fi
-      cosign attach sbom "${attach_flags[@]}" --sbom "${sbom_file}" "${ref}"
+      # attach sbom does not support --yes (unlike cosign sign for keyless terms)
+      cosign attach sbom --sbom "${sbom_file}" "${ref}"
     fi
   fi
 done
