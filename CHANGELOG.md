@@ -4,10 +4,6 @@ All notable changes to this project are documented here. Version numbers match O
 
 ## [Unreleased]
 
-### Fixed
-
-- Kind E2E metrics probe: mount cert-manager metrics TLS in `config/overlays/local`, declare container port `8443`, and wait for TLS secrets plus metrics server readiness before curling (fixes flaky connection refused).
-
 ## [0.0.47] - 2026-06-19
 
 ### Added
@@ -21,6 +17,10 @@ All notable changes to this project are documented here. Version numbers match O
 - CI: operator-sdk scorecard on pull requests; `govulncheck` in security workflow.
 - OLM bundle: deduplicate unprefixed `PrometheusRule` manifest (keep prefixed copy only).
 - Go toolchain: require **1.25.11** (stdlib security fixes for govulncheck / release builds).
+
+### Fixed
+
+- Kind E2E metrics probe: mount cert-manager metrics TLS in `config/overlays/local`, declare container port `8443`, regenerate OLM bundle (`targetPort: https`), and wait for TLS secrets before curling (fixes flaky connection refused).
 
 ## [0.0.46] - 2026-06-19
 
