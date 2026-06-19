@@ -3,9 +3,32 @@
 resources:
 - bases/project-onboarding-operator.clusterserviceversion.yaml
 - ../default
+- ../prometheus
 - ../openshift
 - ../samples
 - ../scorecard
+
+replacements:
+  - source:
+      kind: Secret
+      name: controller-manager-metrics-reader-token
+      fieldPath: metadata.name
+    targets:
+      - select:
+          kind: ServiceMonitor
+          name: controller-manager-metrics-monitor
+        fieldPaths:
+          - spec.endpoints.0.authorization.credentials.name
+  - source:
+      kind: ServiceAccount
+      name: controller-manager
+      fieldPath: metadata.name
+    targets:
+      - select:
+          kind: Secret
+          name: controller-manager-metrics-reader-token
+        fieldPaths:
+          - metadata.annotations.[kubernetes.io/service-account.name]
 
 patches:
 - path: patches/icon.yaml

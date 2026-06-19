@@ -1,10 +1,10 @@
 # VERSION is read from the VERSION file; override with make bundle VERSION=x.y.z
-VERSION ?= $(shell tr -d ' \n\r' < VERSION 2>/dev/null)
+VERSION ?= $(shell cat VERSION 2>/dev/null | tr -d ' \n\r')
 ifeq ($(VERSION),)
 $(error VERSION is empty — set VERSION=x.y.z or add a VERSION file in the repo root)
 endif
 
-PREV_VERSION := $(shell v='$(VERSION)'; IFS='.' read -r a b c <<< "$$v" || exit 0; if [ -n "$$c" ] && [ "$$c" -gt 0 ] 2>/dev/null; then echo "$$a.$$b.$$((c-1))"; fi)
+PREV_VERSION := $(shell python3 -c "v='$(VERSION)'.strip().split('.'); print(f'{v[0]}.{v[1]}.{int(v[2])-1}' if len(v)==3 and v[2].isdigit() and int(v[2])>0 else '')" 2>/dev/null)
 
 # CHANNELS define the bundle channels used in the bundle.
 CHANNELS ?= stable

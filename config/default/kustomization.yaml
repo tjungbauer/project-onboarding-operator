@@ -19,9 +19,7 @@ resources:
 - ../rbac
 - ../manager
 - ../webhook
-# [PROMETHEUS] Prometheus Operator ServiceMonitor + alerting rules (requires Prometheus Operator CRDs).
-# Enabled in config/manifests for OLM/OpenShift bundles only — not for Kind/local `make deploy`.
-- ../prometheus
+# Prometheus Operator ServiceMonitor + rules: config/manifests (OLM bundle) only — not Kind/local deploy.
 # [METRICS] Expose the controller manager metrics service.
 - metrics_service.yaml
 # [NETWORK POLICY] Protect metrics and webhook endpoints (requires namespace label metrics: enabled for scrapers).
@@ -45,27 +43,5 @@ patches:
 - path: manager_webhook_patch.yaml
   target:
     kind: Deployment
-
-replacements:
-  - source:
-      kind: Secret
-      name: controller-manager-metrics-reader-token
-      fieldPath: metadata.name
-    targets:
-      - select:
-          kind: ServiceMonitor
-          name: controller-manager-metrics-monitor
-        fieldPaths:
-          - spec.endpoints.0.authorization.credentials.name
-  - source:
-      kind: ServiceAccount
-      name: controller-manager
-      fieldPath: metadata.name
-    targets:
-      - select:
-          kind: Secret
-          name: controller-manager-metrics-reader-token
-        fieldPaths:
-          - metadata.annotations.[kubernetes.io/service-account.name]
 
 # OpenShift serving-cert + SCC: config/manifests (../openshift). cert-manager TLS: config/overlays/local.
