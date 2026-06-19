@@ -63,6 +63,8 @@ Start with [docs/install.md](docs/install.md), then [docs/guide.md](docs/guide.m
 | Cluster GitOps defaults (`onboarding-defaults` ConfigMap) | [docs/cluster-defaults.md](docs/cluster-defaults.md) |
 | Local testing (unit → Kind E2E → manual deploy) | [docs/local-testing.md](docs/local-testing.md) |
 | OpenShift test cases (TC-00–TC-14) | [docs/openshift-testcases.md](docs/openshift-testcases.md) |
+| Operational runbook | [docs/runbook.md](docs/runbook.md) |
+| Supply chain (cosign, SBOM) | [docs/supply-chain.md](docs/supply-chain.md) |
 | Contributing | [CONTRIBUTING.md](CONTRIBUTING.md) |
 
 
@@ -110,7 +112,7 @@ Hardened runtime image, non-root pod, leader election, HA (3 replicas + PDB), se
 
 Metrics are served over HTTPS with RBAC filtering (`--metrics-secure=true`). On OpenShift, the bundled `ServiceMonitor` scrapes port 8443 using a bearer token from a namespace `Secret` (`authorization` credentials); cert-manager is not required (OLM injects webhook serving certs separately).
 
-Release version: [VERSION](VERSION) · [CHANGELOG.md](CHANGELOG.md) · [SECURITY.md](SECURITY.md)
+Release version: [VERSION](VERSION) · [CHANGELOG.md](CHANGELOG.md) · [SECURITY.md](SECURITY.md) · [Supply chain](docs/supply-chain.md)
 
 ## License
 

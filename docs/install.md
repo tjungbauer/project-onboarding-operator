@@ -25,6 +25,7 @@ After install:
 - Apply samples: `oc apply -k config/samples/`
 - Optional cluster GitOps defaults: [cluster-defaults.md](cluster-defaults.md)
 - Helm chart migration samples: `config/samples/migration/`
+- Production troubleshooting: [runbook.md](runbook.md)
 
 Pause reconciliation on a tenant CR:
 

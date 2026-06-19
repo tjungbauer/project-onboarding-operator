@@ -1,0 +1,11 @@
+# Default reviewers for all paths. GitHub requests review from these owners on pull requests.
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+* @tjungbauer
+
+# Release-critical paths — explicit ownership for supply chain and OLM packaging
+/.github/workflows/release.yml @tjungbauer
+/scripts/release-openshift.sh @tjungbauer
+/scripts/sign-release-images.sh @tjungbauer
+/bundle/ @tjungbauer
+/config/manifests/ @tjungbauer

@@ -79,7 +79,7 @@ func (r *ProjectOnboardingReconciler) Reconcile(ctx context.Context, req ctrl.Re
 		complete, pendingMessage, err := onboarding.FinalizeProjectOnboardingDeletion(ctx, r.Client, po)
 		if err != nil {
 			log.Error(err, "failed to finalize project onboarding deletion")
-			return onboarding.ReconcileResultForError(err)
+			return onboarding.RecordAndReconcileError(err, "deletion_finalize")
 		}
 		if !complete {
 			status := po.Status.DeepCopy()
@@ -92,19 +92,20 @@ func (r *ProjectOnboardingReconciler) Reconcile(ctx context.Context, req ctrl.Re
 			)
 			po.Status = *status
 			if err := r.Status().Update(ctx, po); err != nil && !apierrors.IsConflict(err) {
-				return onboarding.ReconcileResultForError(err)
+				return onboarding.RecordAndReconcileError(err, "status_update")
 			}
 			recordWarning(r.Recorder, po, "DeletionBlocked", pendingMessage)
 			return ctrl.Result{RequeueAfter: 30 * time.Second}, nil
 		}
 		if err := onboarding.RemoveFinalizer(ctx, r.Client, po); err != nil {
-			return onboarding.ReconcileResultForError(err)
+			return onboarding.RecordAndReconcileError(err, "finalizer_remove")
 		}
+		onboarding.DeleteTenantMetrics(po.Name)
 		return ctrl.Result{}, nil
 	}
 
 	if err := onboarding.EnsureFinalizer(ctx, r.Client, po); err != nil {
-		return onboarding.ReconcileResultForError(err)
+		return onboarding.RecordAndReconcileError(err, "finalizer_ensure")
 	}
 
 	if onboarding.IsReconciliationPaused(po) {
@@ -115,14 +116,14 @@ func (r *ProjectOnboardingReconciler) Reconcile(ctx context.Context, req ctrl.Re
 	defaults, err := onboarding.LoadClusterDefaults(ctx, r.Client, r.operatorNamespace())
 	if err != nil {
 		log.Error(err, "failed to load cluster onboarding defaults")
-		return onboarding.ReconcileResultForError(err)
+		return onboarding.RecordAndReconcileError(err, "defaults_load")
 	}
 	effectivePO := onboarding.MergeClusterDefaults(defaults, po)
 
 	if err := onboarding.PruneRemovedNamespaces(ctx, r.Client, po); err != nil {
 		log.Error(err, "failed to prune removed namespaces")
 		recordWarning(r.Recorder, po, "PruneFailed", err.Error())
-		return onboarding.ReconcileResultForError(err)
+		return onboarding.RecordAndReconcileError(err, "prune")
 	}
 
 	status := po.Status.DeepCopy()
@@ -191,11 +192,13 @@ func (r *ProjectOnboardingReconciler) Reconcile(ctx context.Context, req ctrl.Re
 		if apierrors.IsConflict(err) {
 			return ctrl.Result{Requeue: true}, nil
 		}
-		return ctrl.Result{}, err
+		return onboarding.RecordAndReconcileError(err, "status_update")
 	}
 
+	onboarding.SetActiveTenantCount(po.Name, onboarding.ActiveTenantCount(po.Spec.Namespaces))
+
 	if firstError != nil {
-		return onboarding.ReconcileResultForError(firstError)
+		return onboarding.RecordAndReconcileError(firstError, "namespace_reconcile")
 	}
 
 	return ctrl.Result{}, nil

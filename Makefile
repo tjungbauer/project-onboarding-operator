@@ -332,6 +332,7 @@ bundle: generate-csv-icon manifests kustomize operator-sdk ## Generate bundle ma
 	python3 scripts/patch-csv-spec-descriptors.py
 	python3 scripts/pin-bundle-created-at.py
 	@rm -f bundle/manifests/controller-manager-metrics-monitor_monitoring.coreos.com_v1_servicemonitor.yaml
+	@rm -f bundle/manifests/controller-manager-rules_monitoring.coreos.com_v1_prometheusrule.yaml
 	@if [ -n "$(PREV_VERSION)" ]; then \
 		$(KUSTOMIZE) version --short 2>/dev/null | grep -q v5 || true; \
 		python3 -c "import pathlib,re; p=pathlib.Path('bundle/manifests/project-onboarding-operator.clusterserviceversion.yaml'); t=p.read_text(); t=re.sub(r'^  replaces:.*\n','',t,flags=re.M); t=t.replace('  version: $(VERSION)\n','  replaces: project-onboarding-operator.v$(PREV_VERSION)\n  version: $(VERSION)\n',1); p.write_text(t)"; \

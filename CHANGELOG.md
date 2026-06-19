@@ -2,11 +2,30 @@
 
 All notable changes to this project are documented here. Version numbers match OLM bundle / image tags.
 
-## [0.0.46] - 2026-06-19
+## [Unreleased]
+
+## [0.0.47] - 2026-06-19
+
+### Added
+
+- Custom Prometheus metrics: `projectonboarding_tenants_total`, `projectonboarding_reconcile_errors_total{reason}`; operational runbook [docs/runbook.md](docs/runbook.md).
+- Supply chain: cosign image signing + SPDX SBOM on release ([docs/supply-chain.md](docs/supply-chain.md)); GitHub `CODEOWNERS`, issue templates, PR template.
 
 ### Changed
 
-- Testing github action release
+- CI: release workflow validates Kind E2E and operator-sdk scorecard before publishing images.
+- CI: operator-sdk scorecard on pull requests; `govulncheck` in security workflow.
+- OLM bundle: deduplicate unprefixed `PrometheusRule` manifest (keep prefixed copy only).
+
+## [0.0.46] - 2026-06-19
+
+### Fixed
+
+- Release workflow: pass `QUAY_TOKEN` to `release-openshift.sh` so non-interactive Quay login works on GitHub Actions runners (`docker/login-action` credentials are not visible to `docker login --get-login`).
+
+### Changed
+
+- CI: remove operator-sdk scorecard from the bundle pull-request workflow (requires a Kubernetes cluster).
 
 ## [0.0.45] - 2026-06-19
 

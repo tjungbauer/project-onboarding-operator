@@ -1,0 +1,56 @@
+name: Bug report
+description: Report incorrect behaviour, reconcile failures, or install/upgrade problems
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        For **security** issues, do not use this form — see [SECURITY.md](https://github.com/tjungbauer/project-onboarding-operator/blob/main/SECURITY.md).
+
+        For operational triage, see [docs/runbook.md](https://github.com/tjungbauer/project-onboarding-operator/blob/main/docs/runbook.md).
+
+  - type: input
+    id: version
+    attributes:
+      label: Operator version
+      description: CSV or image tag (e.g. 0.0.46)
+      placeholder: "0.0.46"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      options:
+        - OpenShift 4.x (OLM)
+        - OpenShift 4.x (make deploy)
+        - Kubernetes / Kind
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: Steps to reproduce, expected vs actual behaviour
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs / status
+      description: Operator logs, `oc describe pob`, events, Subscription/CSV status
+      render: shell
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Pre-submit
+      options:
+        - label: I searched existing issues and the runbook
+          required: true

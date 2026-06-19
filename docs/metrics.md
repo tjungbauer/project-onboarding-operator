@@ -10,6 +10,8 @@ The manager listens on **`:8443`** (`--metrics-bind-address=:8443`) with **RBAC 
 | ----------------- | ------- |
 | `controller_runtime_reconcile_total` | Reconcile attempts per controller |
 | `controller_runtime_reconcile_errors_total` | Failed reconciles (`projectonboarding`, `tshirtsize`, …) |
+| `projectonboarding_tenants_total{project_onboarding="..."}` | Active tenant namespace entries (enabled, not offboarded) per CR |
+| `projectonboarding_reconcile_errors_total{reason="..."}` | ProjectOnboarding reconcile errors by reason |
 | `workqueue_depth` | Pending items in the controller work queue |
 | `workqueue_adds_total` | Items added to the work queue |
 
@@ -58,6 +60,7 @@ The bundled `PrometheusRule` defines warning alerts (10–15 minute `for` window
 | Alert | Condition |
 | ----- | --------- |
 | `ProjectOnboardingReconcileErrors` | `controller_runtime_reconcile_errors_total{controller="projectonboarding"}` rate > 0 |
+| `ProjectOnboardingReconcileErrorsByReason` | `projectonboarding_reconcile_errors_total` rate > 0 by `reason` |
 | `ProjectOnboardingWorkqueueBacklog` | `workqueue_depth{name="projectonboarding"}` > 10 |
 | `TShirtSizeReconcileErrors` | `controller_runtime_reconcile_errors_total{controller="tshirtsize"}` rate > 0 |
 

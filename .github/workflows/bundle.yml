@@ -38,6 +38,46 @@ jobs:
           grep -q 'minKubeVersion: 1.28.0' bundle/manifests/project-onboarding-operator.clusterserviceversion.yaml
           VERSION="$(tr -d ' \n\r' < VERSION)"
           grep -q "version: ${VERSION}" bundle/manifests/project-onboarding-operator.clusterserviceversion.yaml
+          test ! -f bundle/manifests/controller-manager-rules_monitoring.coreos.com_v1_prometheusrule.yaml
 
       - name: Check committed bundle matches generated output
         run: git diff --exit-code bundle/
+
+  scorecard:
+    name: Operator SDK scorecard
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone the code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Install operator-sdk
+        run: |
+          curl -sSL https://github.com/operator-framework/operator-sdk/releases/download/v1.42.2/operator-sdk_linux_amd64 -o operator-sdk
+          chmod +x operator-sdk
+          sudo mv operator-sdk /usr/local/bin/operator-sdk
+          operator-sdk version
+
+      - name: Install kind
+        run: |
+          curl -Lo ./kind https://kind.sigs.k8s.io/dl/latest/kind-linux-amd64
+          chmod +x ./kind
+          sudo mv ./kind /usr/local/bin/kind
+          kind version
+
+      - name: Prepare Kind cluster
+        run: make setup-test-e2e
+
+      - name: Run scorecard
+        run: |
+          go mod tidy
+          VERSION="$(tr -d ' \n\r' < VERSION)"
+          make scorecard IMG="quay.io/tjungbau/project-onboarding-operator:v${VERSION}"
+
+      - name: Tear down Kind cluster
+        if: always()
+        run: make cleanup-test-e2e

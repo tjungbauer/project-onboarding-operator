@@ -40,3 +40,13 @@ spec:
       for: 10m
       labels:
         severity: warning
+    - alert: ProjectOnboardingReconcileErrorsByReason
+      annotations:
+        description: The projectonboarding controller has reported reconcile errors
+          with reason {{ $labels.reason }} for more than 10 minutes.
+        summary: Project Onboarding reconcile errors ({{ $labels.reason }})
+      expr: |
+        sum(rate(projectonboarding_reconcile_errors_total[5m])) by (reason) > 0
+      for: 10m
+      labels:
+        severity: warning

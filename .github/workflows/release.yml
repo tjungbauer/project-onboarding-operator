@@ -19,26 +19,77 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
+
+      - name: Resolve version
+        id: version
+        run: |
+          VERSION="${{ github.event.inputs.version || github.ref_name }}"
+          VERSION="${VERSION#v}"
+          echo "value=${VERSION}" >> "$GITHUB_OUTPUT"
+
       - name: Install operator-sdk
         run: |
           curl -sSL https://github.com/operator-framework/operator-sdk/releases/download/v1.42.2/operator-sdk_linux_amd64 -o operator-sdk
           chmod +x operator-sdk
           sudo mv operator-sdk /usr/local/bin/operator-sdk
+          operator-sdk version
+
       - name: Unit tests
         run: make test
+
+      - name: Install kind
+        run: |
+          curl -Lo ./kind https://kind.sigs.k8s.io/dl/latest/kind-linux-amd64
+          chmod +x ./kind
+          sudo mv ./kind /usr/local/bin/kind
+          kind version
+
+      - name: Prepare Kind E2E environment
+        env:
+          CONTAINER_TOOL: docker
+        run: |
+          go mod tidy
+          make setup-test-e2e
+          VERSION="${{ steps.version.outputs.value }}"
+          IMG="example.com/project-onboarding-operator:v${VERSION}"
+          docker build -t "${IMG}" .
+          kind load docker-image "${IMG}" --name project-onboarding-operator-test-e2e
+          docker pull curlimages/curl:8.12.1
+          kind load docker-image curlimages/curl:8.12.1 --name project-onboarding-operator-test-e2e
+          kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.16.3/cert-manager.yaml
+          kubectl wait --for=condition=Available -n cert-manager deployment --all --timeout=300s
+
+      - name: Kind E2E tests
+        env:
+          CERT_MANAGER_INSTALL_SKIP: "true"
+          E2E_SKIP_IMAGE_BUILD: "true"
+          CONTAINER_TOOL: docker
+          KIND_CLUSTER: project-onboarding-operator-test-e2e
+        run: |
+          go test ./test/e2e/ -v -ginkgo.v -timeout 30m -ginkgo.skip="OpenShift test cases"
+
       - name: Generate bundle
         run: |
-          VERSION="${{ github.event.inputs.version || github.ref_name }}"
-          VERSION="${VERSION#v}"
-          make bundle IMG="quay.io/tjungbau/project-onboarding-operator:v${VERSION}"
+          make bundle IMG="quay.io/tjungbau/project-onboarding-operator:v${{ steps.version.outputs.value }}"
+
       - name: Verify committed bundle
         run: git diff --exit-code bundle/
+
+      - name: Operator SDK scorecard
+        run: operator-sdk scorecard --verbose ./bundle
+
+      - name: Tear down Kind cluster
+        if: always()
+        run: make cleanup-test-e2e
 
   publish:
     name: Build, scan, and push images
     needs: validate
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
+      id-token: write
     steps:
       - uses: actions/checkout@v4
 
@@ -71,3 +122,26 @@ jobs:
           exit-code: 1
           severity: CRITICAL,HIGH
           ignore-unfixed: true
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3.8.0
+
+      - name: Install syft
+        uses: anchore/sbom-action/download-syft@v1
+
+      - name: Sign images and attach SBOMs
+        env:
+          VERSION: ${{ steps.version.outputs.value }}
+          COSIGN_EXPERIMENTAL: "true"
+          COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
+          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+        run: |
+          chmod +x scripts/sign-release-images.sh
+          ./scripts/sign-release-images.sh "${VERSION}"
+
+      - name: Publish SBOMs on GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          files: dist/sbom/*.spdx.json
+          generate_release_notes: true

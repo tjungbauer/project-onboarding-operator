@@ -40,6 +40,17 @@ func IsOffboard(offboard *bool) bool {
 	return IsOptInEnabled(offboard)
 }
 
+// ActiveTenantCount returns enabled, non-offboarded namespace entries in spec.
+func ActiveTenantCount(namespaces []onboardingv1beta1.NamespaceSpec) int {
+	count := 0
+	for _, ns := range namespaces {
+		if IsEnabled(ns.Enabled) && !IsOffboard(ns.Offboard) {
+			count++
+		}
+	}
+	return count
+}
+
 func IsDefaultTrue(value *bool) bool {
 	if value == nil {
 		return true
