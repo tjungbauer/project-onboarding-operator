@@ -57,6 +57,8 @@ jobs:
         env:
           VERSION: ${{ steps.version.outputs.value }}
           CONTAINER_TOOL: docker
+          QUAY_USERNAME: ${{ secrets.QUAY_USERNAME }}
+          QUAY_TOKEN: ${{ secrets.QUAY_TOKEN }}
         run: |
           chmod +x scripts/release-openshift.sh
           SKIP_BUILD=false ./scripts/release-openshift.sh "${VERSION}"

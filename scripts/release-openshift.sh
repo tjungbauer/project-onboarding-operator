@@ -8,6 +8,8 @@
 #
 # Optional environment variables:
 #   QUAY_USER         default: tjungbau
+#   QUAY_USERNAME     optional; used with QUAY_TOKEN (GitHub Actions secrets)
+#   QUAY_TOKEN        optional; non-interactive quay.io login (CI)
 #   OPERATOR_NS       default: project-onboarding-operator
 #   CONTAINER_TOOL    default: podman
 #   PLATFORM          default: linux/amd64
@@ -150,11 +152,23 @@ echo "    BUNDLE_IMG=${BUNDLE_IMG}"
 echo "    CATALOG_IMG=${CATALOG_IMG}"
 echo "    UPGRADE=${UPGRADE}"
 
-if [[ "${SKIP_BUILD}" != "true" ]]; then
-  if ! "${CONTAINER_TOOL}" login quay.io --get-login >/dev/null 2>&1; then
-    echo "error: not logged in to quay.io — run: ${CONTAINER_TOOL} login quay.io -u ${QUAY_USER}" >&2
-    exit 1
+ensure_quay_login() {
+  local user="${QUAY_USERNAME:-${QUAY_USER}}"
+  if [[ -n "${QUAY_TOKEN:-}" ]]; then
+    echo "==> Logging in to quay.io as ${user}"
+    echo "${QUAY_TOKEN}" | "${CONTAINER_TOOL}" login quay.io -u "${user}" --password-stdin
+    return
   fi
+  if "${CONTAINER_TOOL}" login quay.io --get-login >/dev/null 2>&1; then
+    return
+  fi
+  echo "error: not logged in to quay.io — run: ${CONTAINER_TOOL} login quay.io -u ${QUAY_USER}" >&2
+  echo "       or set QUAY_TOKEN (and optionally QUAY_USERNAME) for non-interactive login" >&2
+  exit 1
+}
+
+if [[ "${SKIP_BUILD}" != "true" ]]; then
+  ensure_quay_login
 
   echo "==> Building operator image (${PLATFORM})"
   GIT_COMMIT="$(git -C "${ROOT}" rev-parse --short HEAD 2>/dev/null || echo unknown)"
