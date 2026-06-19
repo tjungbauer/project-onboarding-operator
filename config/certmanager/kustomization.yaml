@@ -1,0 +1,10 @@
+namespace: project-onboarding-operator
+namePrefix: project-onboarding-operator-
+
+resources:
+- issuer.yaml
+- certificate-webhook.yaml
+- certificate-metrics.yaml
+
+configurations:
+- kustomizeconfig.yaml

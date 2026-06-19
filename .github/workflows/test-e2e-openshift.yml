@@ -1,0 +1,34 @@
+name: Test E2E (OpenShift)
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 4 * * 1'
+
+jobs:
+  openshift-e2e:
+    name: OpenShift test cases (TC-00–TC-14)
+    runs-on: ubuntu-latest
+    if: ${{ secrets.OPENSHIFT_KUBECONFIG != '' }}
+    steps:
+      - name: Clone the code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Configure kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.OPENSHIFT_KUBECONFIG }}" | base64 -d > ~/.kube/config
+          kubectl cluster-info
+
+      - name: Run OpenShift E2E
+        env:
+          OPENSHIFT_E2E: "true"
+          OPERATOR_NS: project-onboarding-operator
+        run: make test-e2e-openshift

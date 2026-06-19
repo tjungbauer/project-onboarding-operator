@@ -1,0 +1,7 @@
+# TC-06: Admission — invalid TShirtSize (negative; expect server rejection)
+# Usage: oc apply --dry-run=server -f test/openshift/manifests/tc06-invalid-tshirtsize.yaml
+apiVersion: onboarding.stderr.at/v1beta1
+kind: TShirtSize
+metadata:
+  name: tc06-invalid
+spec: {}

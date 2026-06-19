@@ -1,0 +1,33 @@
+# TC-13: GitOps AppProject reconciliation.
+# Requires: appprojects.argoproj.io CRD and namespace gitops-application (see docs/openshift-testcases.md).
+apiVersion: onboarding.stderr.at/v1beta1
+kind: ProjectOnboarding
+metadata:
+  name: tc13-gitops-onboarding
+spec:
+  gitOps:
+    applicationNamespace: gitops-application
+    allowedSourceRepos:
+      - https://github.com/example-org/example-repo
+    allowedOIDCGroups:
+      - ocp-test-admins
+    destinations:
+      - name: in-cluster
+        server: https://kubernetes.default.svc
+  namespaces:
+    - name: ocp-test-gitops-dev
+      applicationGitOpsNamespace: gitops-application
+      argoCDProjects:
+        - name: ocp-test-gitops-dev
+          enabled: true
+          roles:
+            - name: write
+              description: Write access for ocp-test
+              policies:
+                - action: get
+                - action: sync
+            - name: read
+              description: Read access for ocp-test
+              fullAccess: false
+              policies:
+                - action: get

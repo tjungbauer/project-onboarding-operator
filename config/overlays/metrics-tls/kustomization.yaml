@@ -1,0 +1,49 @@
+# Optional overlay: cert-manager TLS for the metrics endpoint and ServiceMonitor CA verification.
+# Requires cert-manager CRDs and controller in the cluster.
+#
+#   kubectl apply -k config/overlays/metrics-tls/
+#
+# OLM/OperatorHub bundles keep self-signed metrics with insecureSkipVerify on the ServiceMonitor.
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- ../../default
+- ../../certmanager
+
+patches:
+- path: patches/cert_metrics_manager_patch.yaml
+  target:
+    kind: Deployment
+- path: patches/monitor_tls_patch.yaml
+  target:
+    kind: ServiceMonitor
+
+replacements:
+- source:
+    kind: Service
+    version: v1
+    name: controller-manager-metrics-service
+    fieldPath: metadata.name
+  targets:
+  - select:
+      kind: ServiceMonitor
+    fieldPaths:
+    - spec.endpoints.0.tlsConfig.serverName
+    options:
+      delimiter: '.'
+      index: 0
+- source:
+    kind: Service
+    version: v1
+    name: controller-manager-metrics-service
+    fieldPath: metadata.namespace
+  targets:
+  - select:
+      kind: ServiceMonitor
+    fieldPaths:
+    - spec.endpoints.0.tlsConfig.serverName
+    options:
+      delimiter: '.'
+      index: 1

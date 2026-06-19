@@ -1,0 +1,10 @@
+# TC-07: Admission — unknown projectSize (negative; expect webhook rejection)
+# Usage: oc apply --dry-run=server -f test/openshift/manifests/tc07-bad-projectsize.yaml
+apiVersion: onboarding.stderr.at/v1beta1
+kind: ProjectOnboarding
+metadata:
+  name: tc07-bad-size
+spec:
+  namespaces:
+    - name: should-not-exist
+      projectSize: does-not-exist

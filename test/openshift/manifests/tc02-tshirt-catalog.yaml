@@ -1,0 +1,19 @@
+# TC-02: T-shirt size catalogue entry
+apiVersion: onboarding.stderr.at/v1beta1
+kind: TShirtSize
+metadata:
+  name: ocp-test-medium
+spec:
+  description: OpenShift test — medium tenant
+  resourceQuotas:
+    cpu: "2"
+    memory: 4Gi
+    pods: 30
+  limitRanges:
+    container:
+      default:
+        cpu: 500m
+        memory: 512Mi
+      defaultRequest:
+        cpu: 200m
+        memory: 512Mi

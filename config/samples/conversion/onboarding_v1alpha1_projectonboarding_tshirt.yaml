@@ -1,0 +1,17 @@
+apiVersion: onboarding.stderr.at/v1alpha1
+kind: ProjectOnboarding
+metadata:
+  name: team-gamma-dev
+spec:
+  namespaces:
+    - name: team-gamma-dev
+      projectSize: small
+      overwriteTshirt: true
+      resourceQuotas:
+        cpu: "2"
+      defaultPolicies:
+        allowFromIngress: true
+        allowFromMonitoring: true
+        allowKubeAPIServer: true
+        allowToDNS: true
+        allowFromSameNamespace: true

@@ -1,0 +1,18 @@
+# Cluster-wide GitOps defaults (optional). Tenant ProjectOnboarding CR fields override these values.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: onboarding-defaults
+  labels:
+    app.kubernetes.io/name: project-onboarding-operator
+    app.kubernetes.io/component: defaults
+data:
+  defaults.yaml: |
+    gitOps:
+      applicationNamespace: gitops-application
+      allowedSourceRepos:
+        - https://myrepo
+        - https://the-second-repo
+      destinations:
+        - name: in-cluster
+          server: https://kubernetes.default.svc

@@ -1,0 +1,16 @@
+# Enable conversion webhook for ProjectOnboarding CRD (hub: v1beta1, spoke: v1alpha1).
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: projectonboardings.onboarding.stderr.at
+spec:
+  conversion:
+    strategy: Webhook
+    webhook:
+      clientConfig:
+        service:
+          namespace: system
+          name: webhook-service
+          path: /convert
+      conversionReviewVersions:
+      - v1

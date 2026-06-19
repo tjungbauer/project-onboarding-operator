@@ -1,0 +1,38 @@
+# Trimmed tenant1-style GitOps onboarding (maps helper-proj-onboarding argocd_rbac_setup).
+apiVersion: onboarding.stderr.at/v1beta1
+kind: ProjectOnboarding
+metadata:
+  name: tenant1-onboarding
+spec:
+  gitOps:
+    allowedSourceRepos:
+      - https://my-git-repo.com/super-repo
+    allowedOIDCGroups:
+      - admin-group-1
+      - admin-group-2
+    destinations:
+      - name: in-cluster
+        server: https://kubernetes.default.svc
+  namespaces:
+    - name: tenant1-app-1
+      applicationGitOpsNamespace: gitops-application
+      enabled: true
+      localAdminGroup:
+        enabled: true
+        users:
+          - mona
+          - peter
+      argoCDProjects:
+        - name: tenant1-app-1
+          enabled: true
+          roles:
+            - name: write
+              description: Write access
+              policies:
+                - action: get
+                - action: sync
+            - name: read
+              description: Read access
+              fullAccess: false
+              policies:
+                - action: get

@@ -1,0 +1,54 @@
+apiVersion: onboarding.stderr.at/v1beta1
+kind: TShirtSize
+metadata:
+  name: small
+spec:
+  description: Small tenant
+  resourceQuotas:
+    enabled: true
+    limits:
+      cpu: "1"
+      memory: 1Gi
+    requests:
+      cpu: 500m
+      memory: 1Gi
+  limitRanges:
+    enabled: true
+    container:
+      default:
+        cpu: "1"
+        memory: 4Gi
+      defaultRequest:
+        cpu: "1"
+        memory: 2Gi
+---
+apiVersion: onboarding.stderr.at/v1beta1
+kind: TShirtSize
+metadata:
+  name: large
+spec:
+  description: Large tenant
+  resourceQuotas:
+    enabled: true
+    limits:
+      cpu: "2"
+      memory: 2Gi
+    requests:
+      cpu: "1"
+      memory: 1Gi
+---
+apiVersion: onboarding.stderr.at/v1beta1
+kind: TShirtSize
+metadata:
+  name: extra-large
+spec:
+  description: Extra-large tenant
+  resourceQuotas:
+    enabled: true
+    pods: 100
+    limits:
+      cpu: "4"
+      memory: 4Gi
+    requests:
+      cpu: "1"
+      memory: 2Gi

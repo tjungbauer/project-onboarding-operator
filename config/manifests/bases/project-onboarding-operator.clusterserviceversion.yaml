@@ -1,0 +1,83 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: ClusterServiceVersion
+metadata:
+  annotations:
+    alm-examples: '[]'
+    capabilities: Full Lifecycle
+    categories: OpenShift Optional
+    operatorframework.io/suggested-namespace: project-onboarding-operator
+    repository: https://github.com/tjungbauer/project-onboarding-operator
+  name: project-onboarding-operator.v0.0.0
+  namespace: placeholder
+spec:
+  apiservicedefinitions: {}
+  customresourcedefinitions:
+    owned:
+    - description: ProjectOnboarding is a cluster-scoped schema for project onboarding
+        API.
+      displayName: Project Onboarding
+      kind: ProjectOnboarding
+      name: projectonboardings.onboarding.stderr.at
+      version: v1beta1
+    - description: ProjectOnboarding is a cluster-scoped schema for project onboarding
+        API.
+      displayName: Project Onboarding
+      kind: ProjectOnboarding
+      name: projectonboardings.onboarding.stderr.at
+      version: v1alpha1
+    - description: TShirtSize is a cluster-scoped catalogue entry to pre-define project
+        sizes (S, M, L, ...).
+      displayName: TShirt Size
+      kind: TShirtSize
+      name: tshirtsizes.onboarding.stderr.at
+      version: v1beta1
+    - description: TShirtSize is a cluster-scoped catalogue entry to pre-define project
+        sizes (S, M, L, ...).
+      displayName: TShirt Size
+      kind: TShirtSize
+      name: tshirtsizes.onboarding.stderr.at
+      version: v1alpha1
+  description: |
+    Operator for OpenShift project/tenant onboarding. Reconciles tenant Namespaces, ResourceQuotas,
+    LimitRanges, NetworkPolicies, OpenShift Groups, RoleBindings, and EgressIPs from a
+    single ProjectOnboarding custom resource. Optionally, pre-define project sizes (S, M, L, ...)
+    via TShirtSize custom resources can be leveraged.
+
+    Install cluster-wide (AllNamespaces). Create cluster-scoped ProjectOnboarding CRs;
+    each CR manages tenant namespaces listed in spec.namespaces.
+  displayName: Project Onboarding
+  icon:
+  - base64data: ""
+    mediatype: ""
+  install:
+    spec:
+      deployments: null
+    strategy: deployment
+  installModes:
+  - supported: false
+    type: OwnNamespace
+  - supported: false
+    type: SingleNamespace
+  - supported: false
+    type: MultiNamespace
+  - supported: true
+    type: AllNamespaces
+  keywords:
+  - openshift
+  - onboarding
+  - namespace
+  - networkpolicy
+  - quota
+  links:
+  - name: Source
+    url: https://github.com/tjungbauer/project-onboarding-operator
+  - name: OpenShift install (OLM)
+    url: https://github.com/tjungbauer/project-onboarding-operator/blob/main/docs/openshift-install.md
+  maintainers:
+  - email: dev@stdin.at
+    name: Thomas Jungbauer
+  maturity: stable
+  minKubeVersion: 1.28.0
+  provider:
+    name: Thomas Jungbauer
+  version: 0.0.0

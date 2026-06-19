@@ -1,0 +1,12 @@
+# OpenShift restricted-v3 SCC requires hostUsers: false on the pod securityContext.
+# Applied only in the OLM bundle (config/manifests), not in config/default Kind/local deploy.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: controller-manager
+  namespace: system
+spec:
+  template:
+    spec:
+      securityContext:
+        hostUsers: false

@@ -1,0 +1,25 @@
+# TC-04: OpenShift-only features — Group, RoleBinding, EgressIP
+# Replace egress IP with an address from your cluster's egress IP pool if you have one.
+apiVersion: onboarding.stderr.at/v1beta1
+kind: ProjectOnboarding
+metadata:
+  name: tc04-openshift-features
+spec:
+  namespaces:
+    - name: ocp-test-egress-dev
+      defaultPolicies:
+        allowFromIngress: false
+        allowFromMonitoring: false
+        allowKubeAPIServer: false
+        allowToDNS: false
+        allowFromSameNamespace: true
+        denyAllEgress: false
+        denyAllIngress: false
+      localAdminGroup:
+        enabled: true
+        users:
+          - ocp-test-admin
+      egressIPs:
+        enabled: true
+        ips:
+          - 203.0.113.50

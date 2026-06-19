@@ -1,0 +1,10 @@
+apiVersion: onboarding.stderr.at/v1beta1
+kind: ProjectOnboarding
+metadata:
+  name: projectonboarding-sample
+spec:
+  namespaces:
+    - additionalSettings:
+        podSecurityAudit: restricted
+        podSecurityWarn: restricted
+        podSecurityEnforce: restricted

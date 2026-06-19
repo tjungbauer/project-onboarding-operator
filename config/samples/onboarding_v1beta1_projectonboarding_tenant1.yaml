@@ -1,0 +1,183 @@
+# ProjectOnboarding equivalent of:
+# https://github.com/tjungbauer/openshift-clusterconfig-gitops/blob/main/tenants/tenant1/in-cluster/values.yaml
+#
+# Operator field mapping (not Helm names):
+#   namespaces[].labels              → additionalSettings.additionalLabels[] (key/value)
+#   additional_settings.cluster_*    → additionalSettings.enableClusterMonitoring
+#   application_gitops_namespace     → namespaces[].applicationGitOpsNamespace
+#   allowed_* / destinations         → spec.gitOps (or onboarding-defaults ConfigMap)
+#
+# Optional: apply config/samples/onboarding_defaults_configmap.yaml and drop spec.gitOps below.
+#
+# Apply: oc apply -f onboarding_v1beta1_projectonboarding_tenant1.yaml
+apiVersion: onboarding.stderr.at/v1beta1
+kind: ProjectOnboarding
+metadata:
+  name: tenant1-onboarding
+spec:
+  gitOps:
+    allowedSourceRepos:
+      - https://my-git-repo.com/super-repo
+    allowedOIDCGroups:
+      - admin-group-1
+      - admin-group-2
+    destinations:
+      - name: in-cluster
+        server: https://kubernetes.default.svc
+  namespaces:
+    - name: tenant1-app-1
+      enabled: true
+      applicationGitOpsNamespace: gitops-application
+      additionalSettings:
+        enableClusterMonitoring: true
+        additionalLabels:
+          - key: my_additional_label
+            value: my_label
+          - key: another_label
+            value: another_label
+      localAdminGroup:
+        enabled: true
+        clusterRole: admin
+        users:
+          - mona
+          - peter
+      argoCDProjects:
+        - name: tenant1-app-1
+          enabled: true
+          roles:
+            - name: write
+              description: Group to deploy on target environments
+              policies:
+                - resource: applications
+                  action: get
+                  permission: allow
+                  object: "*"
+                - resource: applications
+                  action: create
+                  permission: allow
+                - resource: applications
+                  action: update
+                  permission: allow
+                - resource: applications
+                  action: delete
+                  permission: allow
+                - resource: applications
+                  action: sync
+                  permission: allow
+                - resource: applications
+                  action: override
+                  permission: allow
+            - name: read
+              description: Group to deploy on target environments
+              oidcGroups:
+                - read-group
+              policies:
+                - resource: applications
+                  action: get
+                  permission: allow
+        - name: tenant1-app-2
+          enabled: true
+          roles:
+            - name: write
+              description: Group to deploy on target environments
+              fullAccess: true
+      resourceQuotas:
+        enabled: true
+        pods: 4
+        cpu: "4"
+        memory: 4Gi
+        ephemeralStorage: 4Gi
+        replicationControllers: 20
+        resourceQuotas: 20
+        services: 100
+        secrets: 100
+        configMaps: 100
+        persistentVolumeClaims: 10
+        limits:
+          cpu: "4"
+          memory: 4Gi
+          ephemeralStorage: 4Gi
+        requests:
+          cpu: "1"
+          memory: 2Gi
+          storage: 50Gi
+          ephemeralStorage: 2Gi
+        storageClasses:
+          - key: bronze.storageclass.storage.k8s.io/requests.storage
+            value: 10Gi
+          - key: bronze.storageclass.storage.k8s.io/persistentvolumeclaims
+            value: "10"
+      limitRanges:
+        enabled: true
+        pod:
+          max:
+            cpu: "4"
+            memory: 4Gi
+          min:
+            cpu: 500m
+            memory: 500Mi
+        container:
+          max:
+            cpu: "4"
+            memory: 4Gi
+          min:
+            cpu: 500m
+            memory: 500Mi
+          default:
+            cpu: "1"
+            memory: 4Gi
+          defaultRequest:
+            cpu: "1"
+            memory: 2Gi
+        pvc:
+          min:
+            storage: 1Gi
+          max:
+            storage: 20Gi
+      networkPolicies:
+        - name: netpol1
+          active: true
+          podSelector:
+            matchLabels:
+              app: myapplication
+              app2: myapplication2
+          ingressRules:
+            - selectors:
+                - podSelector:
+                    matchLabels:
+                      app: myapplication
+                      version: "1.0"
+                - namespaceSelector:
+                    matchLabels:
+                      testnamespace: "true"
+              ports:
+                - protocol: TCP
+                  port: 443
+          egressRules:
+            - ports:
+                - protocol: UDP
+                  port: 2
+            - ports:
+                - protocol: TCP
+                  port: 443
+              selectors:
+                - podSelector:
+                    matchLabels:
+                      app: myapplication
+                      version: "1.0"
+        - name: netpol2
+          active: true
+          podSelector: {}
+          ingressRules:
+            - selectors:
+                - podSelector: {}
+                - namespaceSelector:
+                    matchLabels:
+                      testnamespace: testnamespace
+                - ipBlock:
+                    cidr: 127.0.0.1/24
+                    except:
+                      - 127.0.0.2/32
+              ports:
+                - protocol: TCP
+                  port: 443

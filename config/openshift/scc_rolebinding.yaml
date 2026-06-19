@@ -1,0 +1,17 @@
+# Required on OpenShift: the manager image runs as UID 65532 (Red Hat Hardened Image).
+# restricted-v2 only allows namespace UID ranges; nonroot-v2 permits arbitrary non-root UIDs.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/name: project-onboarding-operator
+    app.kubernetes.io/managed-by: kustomize
+  name: controller-manager-nonroot-v2
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:openshift:scc:nonroot-v2
+subjects:
+- kind: ServiceAccount
+  name: controller-manager
+  namespace: system

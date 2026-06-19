@@ -1,0 +1,24 @@
+# Grants read-only access to TShirtSize catalogue entries.
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: project-onboarding-operator
+    app.kubernetes.io/managed-by: kustomize
+  name: tshirtsize-viewer-role
+rules:
+- apiGroups:
+  - onboarding.stderr.at
+  resources:
+  - tshirtsizes
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - onboarding.stderr.at
+  resources:
+  - tshirtsizes/status
+  verbs:
+  - get

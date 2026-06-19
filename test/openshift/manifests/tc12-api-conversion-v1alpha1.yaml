@@ -1,0 +1,20 @@
+# TC-12: Apply v1alpha1 — etcd stores v1beta1 (conversion webhook).
+apiVersion: onboarding.stderr.at/v1alpha1
+kind: ProjectOnboarding
+metadata:
+  name: tc12-conversion-test
+spec:
+  namespaces:
+    - name: ocp-test-conversion-dev
+      resourceQuotas:
+        pods: 5
+        cpu: "1"
+        memory: 1Gi
+      defaultPolicies:
+        allowFromIngress: false
+        allowFromMonitoring: false
+        allowKubeAPIServer: false
+        allowToDNS: false
+        allowFromSameNamespace: true
+        denyAllEgress: false
+        denyAllIngress: false

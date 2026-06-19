@@ -1,0 +1,19 @@
+{
+  "name": "project-onboarding-operator",
+  "image": "golang:1.25",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+    "ghcr.io/devcontainers/features/git:1": {}
+  },
+  "runArgs": ["--network=host"],
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-kubernetes-tools.vscode-kubernetes-tools",
+        "ms-azuretools.vscode-docker",
+        "golang.go"
+      ]
+    }
+  },
+  "onCreateCommand": "bash .devcontainer/post-install.sh"
+}

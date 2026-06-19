@@ -1,0 +1,71 @@
+# Adds namespace to all resources.
+namespace: project-onboarding-operator
+
+# Value of this field is prepended to the
+# names of all resources, e.g. a deployment named
+# "wordpress" becomes "alices-wordpress".
+# Note that it should also match with the prefix (text before '-') of the namespace
+# field above.
+namePrefix: project-onboarding-operator-
+
+# Labels to add to all resources and selectors.
+#labels:
+#- includeSelectors: true
+#  pairs:
+#    someName: someValue
+
+resources:
+- ../crd
+- ../rbac
+- ../manager
+- ../webhook
+# [PROMETHEUS] Prometheus Operator ServiceMonitor + alerting rules (requires Prometheus Operator CRDs).
+# Enabled in config/manifests for OLM/OpenShift bundles only — not for Kind/local `make deploy`.
+- ../prometheus
+# [METRICS] Expose the controller manager metrics service.
+- metrics_service.yaml
+# [NETWORK POLICY] Protect metrics and webhook endpoints (requires namespace label metrics: enabled for scrapers).
+- ../network-policy
+
+# Uncomment the patches line if you enable Metrics
+patches:
+# [METRICS] The following patch will enable the metrics endpoint using HTTPS and the port :8443.
+# More info: https://book.kubebuilder.io/reference/metrics
+- path: manager_metrics_patch.yaml
+  target:
+    kind: Deployment
+
+# Uncomment the patches line if you enable Metrics and CertManager
+# [METRICS-WITH-CERTS] To enable metrics protected with certManager, uncomment the following line.
+# This patch will protect the metrics with certManager self-signed certs.
+#- path: cert_metrics_manager_patch.yaml
+#  target:
+#    kind: Deployment
+
+- path: manager_webhook_patch.yaml
+  target:
+    kind: Deployment
+
+replacements:
+  - source:
+      kind: Secret
+      name: controller-manager-metrics-reader-token
+      fieldPath: metadata.name
+    targets:
+      - select:
+          kind: ServiceMonitor
+          name: controller-manager-metrics-monitor
+        fieldPaths:
+          - spec.endpoints.0.authorization.credentials.name
+  - source:
+      kind: ServiceAccount
+      name: controller-manager
+      fieldPath: metadata.name
+    targets:
+      - select:
+          kind: Secret
+          name: controller-manager-metrics-reader-token
+        fieldPaths:
+          - metadata.annotations.[kubernetes.io/service-account.name]
+
+# OpenShift serving-cert + SCC: config/manifests (../openshift). cert-manager TLS: config/overlays/local.

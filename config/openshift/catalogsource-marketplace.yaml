@@ -1,0 +1,22 @@
+# Register the operator in OpenShift OperatorHub (Software Catalog).
+# Requires cluster-admin. Replace the image tag with your release version before applying.
+#
+#   sed 's|:v0.0.0|:v0.0.4|g' config/openshift/catalogsource-marketplace.yaml | oc apply -f -
+#
+# If quay.io repos are private, create a pull secret in openshift-marketplace and
+# uncomment spec.secrets below.
+apiVersion: operators.coreos.com/v1alpha1
+kind: CatalogSource
+metadata:
+  name: project-onboarding-operator-catalog
+  namespace: openshift-marketplace
+spec:
+  displayName: Project Onboarding
+  publisher: Thomas Jungbauer
+  sourceType: grpc
+  image: quay.io/tjungbau/project-onboarding-operator-catalog:v0.0.0
+  updateStrategy:
+    registryPoll:
+      interval: 10m
+  # secrets:
+  # - quay-pull-secret

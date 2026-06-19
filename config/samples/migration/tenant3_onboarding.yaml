@@ -1,0 +1,20 @@
+# Migrated from openshift-clusterconfig-gitops/tenants/tenant3/in-cluster/values.yaml
+apiVersion: onboarding.stderr.at/v1beta1
+kind: ProjectOnboarding
+metadata:
+  name: tenant3-onboarding
+spec:
+  namespaces:
+    - name: tenant3-app-1
+      projectSize: small
+      overwriteTshirt: true
+      resourceQuotas:
+        enabled: true
+        limits:
+          cpu: "10"
+      limitRanges:
+        enabled: true
+      localAdminGroup:
+        enabled: true
+        users:
+          - mona

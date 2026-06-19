@@ -1,0 +1,45 @@
+# TC-01: Core onboarding — namespace, quota, limit range, default network policies.
+# Spec mirrors config/samples/onboarding_v1beta1_projectonboarding.yaml with test-specific names.
+apiVersion: onboarding.stderr.at/v1beta1
+kind: ProjectOnboarding
+metadata:
+  name: tc01-core-onboarding
+spec:
+  namespaces:
+    - name: ocp-test-core-dev
+      additionalSettings:
+        podSecurityAudit: restricted
+        podSecurityWarn: restricted
+        podSecurityEnforce: restricted
+        enableClusterMonitoring: true
+      resourceQuotas:
+        enabled: true
+        pods: 20
+        cpu: "4"
+        memory: 8Gi
+        limits:
+          cpu: "8"
+          memory: 16Gi
+        requests:
+          cpu: "2"
+          memory: 4Gi
+      limitRanges:
+        enabled: true
+        container:
+          default:
+            cpu: 500m
+            memory: 512Mi
+          defaultRequest:
+            cpu: 100m
+            memory: 256Mi
+          max:
+            cpu: "2"
+            memory: 2Gi
+      defaultPolicies:
+        allowFromIngress: true
+        allowFromMonitoring: true
+        allowKubeAPIServer: true
+        allowToDNS: true
+        allowFromSameNamespace: true
+        denyAllEgress: false
+        denyAllIngress: false

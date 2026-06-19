@@ -1,0 +1,17 @@
+# Migrated from openshift-clusterconfig-gitops/tenants/tenant2/in-cluster/values.yaml
+apiVersion: onboarding.stderr.at/v1beta1
+kind: ProjectOnboarding
+metadata:
+  name: tenant2-onboarding
+spec:
+  namespaces:
+    - name: tenant2-app-1
+      localAdminGroup:
+        enabled: true
+        users:
+          - mona
+    - name: tenant2-app-2
+      localAdminGroup:
+        enabled: true
+        users:
+          - mona

@@ -1,0 +1,26 @@
+name: Security
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  image-scan:
+    name: Container image vulnerability scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone the code
+        uses: actions/checkout@v4
+
+      - name: Build manager image
+        run: |
+          docker build --platform=linux/amd64 -t project-onboarding-operator:ci .
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: project-onboarding-operator:ci
+          format: table
+          exit-code: 1
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true

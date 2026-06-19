@@ -1,0 +1,25 @@
+# Build artifacts
+bin/
+cover.out
+
+# Git and IDE
+.git/
+.gitignore
+.github/
+.devcontainer/
+*.md
+!README.md
+
+# Tests (not needed in production image)
+test/
+**/*_test.go
+
+# Kubernetes manifests and tooling (not needed to compile manager)
+config/
+hack/
+Makefile
+PROJECT
+
+# Local env
+.env
+.env.*

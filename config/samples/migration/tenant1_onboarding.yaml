@@ -1,0 +1,151 @@
+# Migrated from openshift-clusterconfig-gitops/tenants/tenant1/in-cluster/values.yaml
+# Canonical samples: ../tenant1/00-onboarding-defaults-configmap.yaml + 01-projectonboarding.yaml
+apiVersion: onboarding.stderr.at/v1beta1
+kind: ProjectOnboarding
+metadata:
+  name: tenant1-onboarding
+spec:
+  namespaces:
+    - name: tenant1-app-1
+      enabled: true
+      applicationGitOpsNamespace: gitops-application
+      additionalSettings:
+        enableClusterMonitoring: true
+        additionalLabels:
+          - key: my_additional_label
+            value: my_label
+          - key: another_label
+            value: another_label
+      localAdminGroup:
+        enabled: true
+        clusterRole: admin
+        users:
+          - mona
+          - peter
+      argoCDProjects:
+        - name: tenant1-app-1
+          enabled: true
+          roles:
+            - name: write
+              description: Group to deploy on target environments
+              policies:
+                - resource: applications
+                  action: get
+                  permission: allow
+                  object: "*"
+                - resource: applications
+                  action: create
+                  permission: allow
+                - resource: applications
+                  action: update
+                  permission: allow
+                - resource: applications
+                  action: delete
+                  permission: allow
+                - resource: applications
+                  action: sync
+                  permission: allow
+                - resource: applications
+                  action: override
+                  permission: allow
+            - name: read
+              description: Group to deploy on target environments
+              oidcGroups:
+                - read-group
+              policies:
+                - resource: applications
+                  action: get
+                  permission: allow
+        - name: tenant1-app-2
+          enabled: true
+          roles:
+            - name: write
+              description: Group to deploy on target environments
+              fullAccess: true
+      resourceQuotas:
+        enabled: true
+        pods: 4
+        cpu: "4"
+        memory: 4Gi
+        ephemeralStorage: 4Gi
+        limits:
+          cpu: "4"
+          memory: 4Gi
+        requests:
+          cpu: "1"
+          memory: 2Gi
+          storage: 50Gi
+      limitRanges:
+        enabled: true
+        pod:
+          max:
+            cpu: "4"
+            memory: 4Gi
+          min:
+            cpu: 500m
+            memory: 500Mi
+        container:
+          max:
+            cpu: "4"
+            memory: 4Gi
+          min:
+            cpu: 500m
+            memory: 500Mi
+          default:
+            cpu: "1"
+            memory: 4Gi
+          defaultRequest:
+            cpu: "1"
+            memory: 2Gi
+        pvc:
+          min:
+            storage: 1Gi
+          max:
+            storage: 20Gi
+      networkPolicies:
+        - name: netpol1
+          active: true
+          podSelector:
+            matchLabels:
+              app: myapplication
+              app2: myapplication2
+          ingressRules:
+            - selectors:
+                - podSelector:
+                    matchLabels:
+                      app: myapplication
+                      version: "1.0"
+                - namespaceSelector:
+                    matchLabels:
+                      testnamespace: "true"
+              ports:
+                - protocol: TCP
+                  port: 443
+          egressRules:
+            - ports:
+                - protocol: UDP
+                  port: 2
+            - ports:
+                - protocol: TCP
+                  port: 443
+              selectors:
+                - podSelector:
+                    matchLabels:
+                      app: myapplication
+                      version: "1.0"
+        - name: netpol2
+          active: true
+          podSelector: {}
+          ingressRules:
+            - selectors:
+                - podSelector: {}
+                - namespaceSelector:
+                    matchLabels:
+                      testnamespace: testnamespace
+                - ipBlock:
+                    cidr: 127.0.0.1/24
+                    except:
+                      - 127.0.0.2/32
+              ports:
+                - protocol: TCP
+                  port: 443

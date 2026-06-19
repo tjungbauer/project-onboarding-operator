@@ -1,0 +1,42 @@
+# Prometheus alerting rules for the operator manager.
+# Requires Prometheus Operator and a Prometheus instance that selects this PrometheusRule.
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    control-plane: controller-manager
+    app.kubernetes.io/name: project-onboarding-operator
+    app.kubernetes.io/managed-by: kustomize
+  name: controller-manager-rules
+  namespace: system
+spec:
+  groups:
+    - name: project-onboarding-operator.rules
+      rules:
+        - alert: ProjectOnboardingReconcileErrors
+          expr: |
+            sum(rate(controller_runtime_reconcile_errors_total{controller="projectonboarding"}[5m])) > 0
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: Project Onboarding controller reconcile errors
+            description: The projectonboarding controller has reported reconcile errors for more than 10 minutes.
+        - alert: ProjectOnboardingWorkqueueBacklog
+          expr: |
+            workqueue_depth{name="projectonboarding"} > 10
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: Project Onboarding workqueue backlog
+            description: The projectonboarding controller workqueue depth has been above 10 for 15 minutes.
+        - alert: TShirtSizeReconcileErrors
+          expr: |
+            sum(rate(controller_runtime_reconcile_errors_total{controller="tshirtsize"}[5m])) > 0
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: TShirtSize controller reconcile errors
+            description: The tshirtsize controller has reported reconcile errors for more than 10 minutes.

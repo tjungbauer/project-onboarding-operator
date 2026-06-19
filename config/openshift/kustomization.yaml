@@ -1,0 +1,13 @@
+resources:
+- scc_rolebinding.yaml
+# catalogsource-marketplace.yaml — apply with version sed; see docs/operatorhub-install.md
+
+patches:
+- path: webhook_service_tls_patch.yaml
+  target:
+    kind: Service
+    name: webhook-service
+- path: webhook_cabundle_patch.yaml
+  target:
+    kind: ValidatingWebhookConfiguration
+    name: validating-webhook-configuration

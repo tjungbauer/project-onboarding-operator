@@ -1,0 +1,28 @@
+# Prometheus Monitor Service (Metrics)
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    control-plane: controller-manager
+    app.kubernetes.io/name: project-onboarding-operator
+    app.kubernetes.io/managed-by: kustomize
+  name: controller-manager-metrics-monitor
+  namespace: system
+spec:
+  endpoints:
+    - path: /metrics
+      port: https # Ensure this is the name of the port that exposes HTTPS metrics
+      scheme: https
+      authorization:
+        type: Bearer
+        credentials:
+          name: controller-manager-metrics-reader-token
+          key: token
+      tlsConfig:
+        # Self-signed controller-runtime certs (default OLM bundle). For cert-manager TLS use
+        # config/overlays/metrics-tls/ and see docs/local-testing.md.
+        insecureSkipVerify: true
+  selector:
+    matchLabels:
+      control-plane: controller-manager
+      app.kubernetes.io/name: project-onboarding-operator
