@@ -279,7 +279,7 @@ spec: {}
 
 		AfterEach(func() {
 			By("deleting the ProjectOnboarding CR if it still exists")
-			cmd := exec.Command("kubectl", "delete", "-f", testdataPath, "--ignore-not-found")
+			cmd := exec.Command("kubectl", "delete", "-f", testdataPath, "--ignore-not-found", "--wait=false")
 			_, _ = utils.Run(cmd)
 		})
 
@@ -310,18 +310,32 @@ spec: {}
 			_, err = utils.Run(cmd)
 			Expect(err).NotTo(HaveOccurred(), "Resource quota should exist")
 
-			By("deleting the ProjectOnboarding CR")
-			cmd = exec.Command("kubectl", "delete", "-f", testdataPath)
+			By("offboarding the tenant namespace before CR delete")
+			offboardPatch := `[{"op":"replace","path":"/spec/namespaces/0/offboard","value":true}]`
+			cmd = exec.Command("kubectl", "patch", "projectonboarding", crName, "--type=json", "-p", offboardPatch)
 			_, err = utils.Run(cmd)
-			Expect(err).NotTo(HaveOccurred(), "Failed to delete ProjectOnboarding CR")
+			Expect(err).NotTo(HaveOccurred(), "Failed to patch ProjectOnboarding for offboard")
 
-			By("waiting for the onboarded namespace to be removed")
-			verifyDeleted := func(g Gomega) {
+			By("waiting for the onboarded namespace to be removed after offboard")
+			verifyNamespaceDeleted := func(g Gomega) {
 				cmd := exec.Command("kubectl", "get", "namespace", targetNS)
 				_, err := utils.Run(cmd)
 				g.Expect(err).To(HaveOccurred())
 			}
-			Eventually(verifyDeleted, 3*time.Minute).Should(Succeed())
+			Eventually(verifyNamespaceDeleted, 3*time.Minute).Should(Succeed())
+
+			By("deleting the ProjectOnboarding CR")
+			cmd = exec.Command("kubectl", "delete", "-f", testdataPath, "--timeout=120s")
+			_, err = utils.Run(cmd)
+			Expect(err).NotTo(HaveOccurred(), "Failed to delete ProjectOnboarding CR")
+
+			By("waiting for the ProjectOnboarding CR to be removed")
+			verifyCRDeleted := func(g Gomega) {
+				cmd := exec.Command("kubectl", "get", "projectonboarding", crName)
+				_, err := utils.Run(cmd)
+				g.Expect(err).To(HaveOccurred())
+			}
+			Eventually(verifyCRDeleted, time.Minute).Should(Succeed())
 		})
 	})
 })

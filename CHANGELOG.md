@@ -12,6 +12,7 @@ All notable changes to this project are documented here. Version numbers match O
 
 - CI: pin bundle CSV `createdAt` for reproducible OLM bundle checks; fix Trivy action version; Kind E2E preloads images in workflow; OpenShift E2E skips cleanly when kubeconfig secret is missing; reduce Dependabot PR limit.
 - CI: use `aquasecurity/trivy-action@v0.36.0` (v-prefixed tag); run `make lint` so golangci-lint matches Go 1.25; portable `PREV_VERSION` in Makefile; Kind deploy excludes Prometheus Operator CRs (ServiceMonitor/PrometheusRule stay in OLM bundle only).
+- E2E: offboard tenant namespace before deleting `ProjectOnboarding` (matches finalizer behaviour; avoids hung `kubectl delete`).
 
 ## [0.0.44] - 2026-06-19
 
