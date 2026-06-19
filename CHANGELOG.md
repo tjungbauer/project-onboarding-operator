@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented here. Version numbers match OLM bundle / image tags.
 
+## [0.0.46] - 2026-06-19
+
+### Changed
+
+- Testing github action release
+
 ## [0.0.45] - 2026-06-19
 
 ### Fixed
