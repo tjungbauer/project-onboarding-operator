@@ -80,6 +80,25 @@ metadata:
 		cmd = exec.Command("make", "deploy", fmt.Sprintf("IMG=%s", projectImage))
 		_, err = utils.Run(cmd)
 		Expect(err).NotTo(HaveOccurred(), "Failed to deploy the controller-manager")
+
+		By("waiting for cert-manager to issue webhook and metrics TLS secrets")
+		waitForSecret := func(name string) {
+			Eventually(func(g Gomega) {
+				cmd := exec.Command("kubectl", "get", "secret", name, "-n", namespace)
+				_, err := utils.Run(cmd)
+				g.Expect(err).NotTo(HaveOccurred(), "secret %s should exist", name)
+			}, 3*time.Minute, 2*time.Second).Should(Succeed())
+		}
+		waitForSecret("webhook-server-cert")
+		waitForSecret("metrics-server-cert")
+
+		By("waiting for the controller-manager rollout to finish")
+		cmd = exec.Command("kubectl", "rollout", "status",
+			"deployment/project-onboarding-operator-controller-manager",
+			"-n", namespace, "--timeout=180s",
+		)
+		_, err = utils.Run(cmd)
+		Expect(err).NotTo(HaveOccurred(), "Controller-manager rollout did not complete")
 	})
 
 	// After all tests have been executed, clean up by undeploying the controller, uninstalling CRDs,
@@ -208,6 +227,7 @@ metadata:
 				output, err := utils.Run(cmd)
 				g.Expect(err).NotTo(HaveOccurred())
 				g.Expect(output).To(ContainSubstring("8443"), "Metrics endpoint is not ready")
+				g.Expect(output).NotTo(ContainSubstring("<none>"), "Metrics endpoint has no ready addresses")
 			}
 			Eventually(verifyMetricsEndpointReady).Should(Succeed())
 
@@ -217,9 +237,9 @@ metadata:
 				output, err := utils.Run(cmd)
 				g.Expect(err).NotTo(HaveOccurred())
 				g.Expect(output).To(SatisfyAny(
-					ContainSubstring("controller-runtime.metrics\tServing metrics server"),
-					ContainSubstring(`"logger":"controller-runtime.metrics"`),
-				), "Metrics server not yet started")
+					ContainSubstring("Serving metrics server"),
+					ContainSubstring(`"msg":"Serving metrics server"`),
+				), "Metrics server not yet listening")
 			}
 			Eventually(verifyMetricsServerStarted).Should(Succeed())
 

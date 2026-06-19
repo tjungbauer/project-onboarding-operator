@@ -4,6 +4,10 @@ All notable changes to this project are documented here. Version numbers match O
 
 ## [Unreleased]
 
+### Fixed
+
+- Kind E2E metrics probe: mount cert-manager metrics TLS in `config/overlays/local`, declare container port `8443`, and wait for TLS secrets plus metrics server readiness before curling (fixes flaky connection refused).
+
 ## [0.0.47] - 2026-06-19
 
 ### Added
