@@ -21,8 +21,7 @@ jobs:
         run: |
           go install golang.org/x/vuln/cmd/govulncheck@v1.4.0
           make build
-          # Source mode panics on Go 1.25+ SSA (TypeParam) for this dependency graph;
-          # binary mode scans the shipped manager artifact without that analysis path.
+          # Binary mode avoids Go 1.25 SSA panics in source mode; go.mod requires 1.25.11+ for stdlib CVE fixes.
           govulncheck -mode=binary ./bin/manager
 
   image-scan:

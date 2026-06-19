@@ -18,7 +18,7 @@ The pod is using a **multi-stage build** image leveraging [Red Hat Hardened Imag
 | Runtime | `registry.access.redhat.com/hi/core-runtime:latest` | Minimal distroless base — no shell, no package manager    |
 
 
-This replaces legacy Docker Hub builder/runtime images (for example `golang:*` and `gcr.io/distroless/static`) with Red Hat–maintained, hardened bases and a smaller attack surface. The project requires **Go 1.25+** (see `go.mod`).
+This replaces legacy Docker Hub builder/runtime images (for example `golang:*` and `gcr.io/distroless/static`) with Red Hat–maintained, hardened bases and a smaller attack surface. The project requires **Go 1.25.11+** (see `go.mod`; patch releases address stdlib CVEs scanned by `govulncheck`).
 
 Pin digests or tags for production:
 
@@ -70,7 +70,7 @@ Start with [docs/install.md](docs/install.md), then [docs/guide.md](docs/guide.m
 
 ## Prerequisites
 
-- Go 1.25+
+- Go 1.25.11+
 - `podman` or `docker`
 - `oc` or `kubectl` with cluster-admin (for install)
 - OpenShift 4.15+ or Kubernetes 1.28+

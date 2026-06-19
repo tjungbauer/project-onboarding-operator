@@ -1,6 +1,6 @@
 {
   "name": "project-onboarding-operator",
-  "image": "golang:1.25",
+  "image": "golang:1.25.11",
   "features": {
     "ghcr.io/devcontainers/features/docker-in-docker:2": {},
     "ghcr.io/devcontainers/features/git:1": {}

@@ -1,6 +1,6 @@
 module github.com/tjungbauer/project-onboarding-operator
 
-go 1.25.0
+go 1.25.11
 
 require (
 	github.com/onsi/ginkgo/v2 v2.22.0

@@ -16,6 +16,7 @@ All notable changes to this project are documented here. Version numbers match O
 - CI: release workflow validates Kind E2E and operator-sdk scorecard before publishing images.
 - CI: operator-sdk scorecard on pull requests; `govulncheck` in security workflow.
 - OLM bundle: deduplicate unprefixed `PrometheusRule` manifest (keep prefixed copy only).
+- Go toolchain: require **1.25.11** (stdlib security fixes for govulncheck / release builds).
 
 ## [0.0.46] - 2026-06-19
 
