@@ -349,7 +349,52 @@ LOCAL_ADMIN_GROUP_DESCRIPTORS = """      - description: Creates an OpenShift Gro
         path: namespaces[0].localAdminGroup.users
 """
 
+PROJECT_ONBOARDING_RESOURCES = """      resources:
+      - kind: Namespace
+        name: namespaces
+        version: v1
+      - kind: ResourceQuota
+        name: resourcequotas
+        version: v1
+      - kind: LimitRange
+        name: limitranges
+        version: v1
+      - kind: NetworkPolicy
+        name: networkpolicies
+        version: v1
+      - kind: RoleBinding
+        name: rolebindings
+        version: v1
+      - kind: Group
+        name: groups
+        version: user.openshift.io/v1
+      - kind: EgressIP
+        name: egressips
+        version: k8s.ovn.org/v1
+      - kind: AppProject
+        name: appprojects
+        version: v1alpha1
+"""
+
+TSHIRT_SIZE_RESOURCES = """      resources:
+      - kind: ResourceQuota
+        name: resourcequotas
+        version: v1
+      - kind: LimitRange
+        name: limitranges
+        version: v1
+"""
+
+TSHIRT_SIZE_DESCRIPTORS = f"""      specDescriptors:
+      - description: Human-readable summary of this T-shirt size (shown in oc/kubectl columns).
+        displayName: Description
+        path: description
+{RESOURCE_QUOTA_DESCRIPTORS.replace("namespaces[0].", "")}{LIMIT_RANGE_DESCRIPTORS.replace("namespaces[0].", "")}"""
+
 DESCRIPTOR_BLOCK = f"""      specDescriptors:
+      - description: Tenant namespaces to provision and manage from this ProjectOnboarding.
+        displayName: Namespaces
+        path: namespaces
       - description: When enabled, the operator creates and updates platform resources for this tenant namespace. When disabled, reconciliation stops and existing resources are left unchanged (frozen).
         displayName: Reconciliation Enabled
         path: namespaces[0].enabled
@@ -408,6 +453,18 @@ OWNED_HEAD = re.compile(
     r"      displayName: Project Onboarding\n"
     r"      kind: ProjectOnboarding\n"
     r"      name: projectonboardings\.onboarding\.stderr\.at\n)"
+    r"(?:      resources:\n(?:(?!      (?:specDescriptors:|version:)).*\n)+)?"
+    r"(?:      specDescriptors:\n(?:(?!      version:).*\n)+)?"
+    r"(      version: v1(?:alpha|beta)1\n)"
+)
+
+TSHIRT_OWNED_HEAD = re.compile(
+    r"(    - description: TShirtSize is a cluster-scoped catalogue entry to pre-define project\n"
+    r"        sizes \(S, M, L, \.\.\.\)\.\n"
+    r"      displayName: TShirt Size\n"
+    r"      kind: TShirtSize\n"
+    r"      name: tshirtsizes\.onboarding\.stderr\.at\n)"
+    r"(?:      resources:\n(?:(?!      (?:specDescriptors:|version:)).*\n)+)?"
     r"(?:      specDescriptors:\n(?:(?!      version:).*\n)+)?"
     r"(      version: v1(?:alpha|beta)1\n)"
 )
@@ -460,9 +517,18 @@ def strip_projectonboarding_quota_limit_examples(text: str) -> str:
 
 def patch_csv(path: Path) -> None:
     text = path.read_text()
-    updated, count = OWNED_HEAD.subn(r"\1" + DESCRIPTOR_BLOCK + r"\2", text)
+    updated, count = OWNED_HEAD.subn(
+        lambda m: m.group(1) + PROJECT_ONBOARDING_RESOURCES + DESCRIPTOR_BLOCK + m.group(2),
+        text,
+    )
     if count != 2:
         sys.exit(f"expected 2 ProjectOnboarding owned entries, patched {count}")
+    updated, tshirt_count = TSHIRT_OWNED_HEAD.subn(
+        lambda m: m.group(1) + TSHIRT_SIZE_RESOURCES + TSHIRT_SIZE_DESCRIPTORS + m.group(2),
+        updated,
+    )
+    if tshirt_count != 2:
+        sys.exit(f"expected 2 TShirtSize owned entries, patched {tshirt_count}")
     updated = strip_projectonboarding_quota_limit_examples(updated)
     path.write_text(updated)
 

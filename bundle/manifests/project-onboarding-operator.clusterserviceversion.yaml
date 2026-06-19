@@ -133,7 +133,35 @@ spec:
       displayName: Project Onboarding
       kind: ProjectOnboarding
       name: projectonboardings.onboarding.stderr.at
+      resources:
+      - kind: Namespace
+        name: namespaces
+        version: v1
+      - kind: ResourceQuota
+        name: resourcequotas
+        version: v1
+      - kind: LimitRange
+        name: limitranges
+        version: v1
+      - kind: NetworkPolicy
+        name: networkpolicies
+        version: v1
+      - kind: RoleBinding
+        name: rolebindings
+        version: v1
+      - kind: Group
+        name: groups
+        version: user.openshift.io/v1
+      - kind: EgressIP
+        name: egressips
+        version: k8s.ovn.org/v1
+      - kind: AppProject
+        name: appprojects
+        version: v1alpha1
       specDescriptors:
+      - description: Tenant namespaces to provision and manage from this ProjectOnboarding.
+        displayName: Namespaces
+        path: namespaces
       - description: When enabled, the operator creates and updates platform resources for this tenant namespace. When disabled, reconciliation stops and existing resources are left unchanged (frozen).
         displayName: Reconciliation Enabled
         path: namespaces[0].enabled
@@ -500,7 +528,35 @@ spec:
       displayName: Project Onboarding
       kind: ProjectOnboarding
       name: projectonboardings.onboarding.stderr.at
+      resources:
+      - kind: Namespace
+        name: namespaces
+        version: v1
+      - kind: ResourceQuota
+        name: resourcequotas
+        version: v1
+      - kind: LimitRange
+        name: limitranges
+        version: v1
+      - kind: NetworkPolicy
+        name: networkpolicies
+        version: v1
+      - kind: RoleBinding
+        name: rolebindings
+        version: v1
+      - kind: Group
+        name: groups
+        version: user.openshift.io/v1
+      - kind: EgressIP
+        name: egressips
+        version: k8s.ovn.org/v1
+      - kind: AppProject
+        name: appprojects
+        version: v1alpha1
       specDescriptors:
+      - description: Tenant namespaces to provision and manage from this ProjectOnboarding.
+        displayName: Namespaces
+        path: namespaces
       - description: When enabled, the operator creates and updates platform resources for this tenant namespace. When disabled, reconciliation stops and existing resources are left unchanged (frozen).
         displayName: Reconciliation Enabled
         path: namespaces[0].enabled
@@ -867,12 +923,348 @@ spec:
       displayName: TShirt Size
       kind: TShirtSize
       name: tshirtsizes.onboarding.stderr.at
+      resources:
+      - kind: ResourceQuota
+        name: resourcequotas
+        version: v1
+      - kind: LimitRange
+        name: limitranges
+        version: v1
+      specDescriptors:
+      - description: Human-readable summary of this T-shirt size (shown in oc/kubectl columns).
+        displayName: Description
+        path: description
+      - description: Resource quota limits for the tenant namespace. Enable reconciliation, then set counts and quantities as needed.
+        displayName: Resource Quotas
+        path: resourceQuotas
+      - description: When enabled, the operator creates or updates a ResourceQuota in the tenant namespace.
+        displayName: Enabled
+        path: resourceQuotas.enabled
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
+      - description: Kubernetes CPU quantity — whole cores (4) or millicores (500m). Plain integers mean CPU cores, not gibibytes.
+        displayName: CPU
+        path: resourceQuotas.cpu
+      - description: Kubernetes memory or storage quantity with a required unit suffix (e.g. 4Gi, 500Mi, 50Gi). Plain numbers such as 4 are rejected by admission (Kubernetes would treat them as bytes). Lower-case gi/mi are normalized to Gi/Mi.
+        displayName: Memory
+        path: resourceQuotas.memory
+      - description: Kubernetes memory or storage quantity with a required unit suffix (e.g. 4Gi, 500Mi, 50Gi). Plain numbers such as 4 are rejected by admission (Kubernetes would treat them as bytes). Lower-case gi/mi are normalized to Gi/Mi.
+        displayName: Ephemeral Storage
+        path: resourceQuotas.ephemeralStorage
+      - description: Maximum number of pods in the namespace.
+        displayName: Pods
+        path: resourceQuotas.pods
+      - description: Maximum number of ReplicationControllers.
+        displayName: Replication Controllers
+        path: resourceQuotas.replicationControllers
+      - description: Maximum number of ResourceQuota objects in the namespace.
+        displayName: Resource Quotas Count
+        path: resourceQuotas.resourceQuotas
+      - description: Maximum number of Services.
+        displayName: Services
+        path: resourceQuotas.services
+      - description: Maximum number of Secrets.
+        displayName: Secrets
+        path: resourceQuotas.secrets
+      - description: Maximum number of ConfigMaps.
+        displayName: ConfigMaps
+        path: resourceQuotas.configMaps
+      - description: Maximum number of PersistentVolumeClaims.
+        displayName: Persistent Volume Claims
+        path: resourceQuotas.persistentVolumeClaims
+      - description: Cluster-wide limits on CPU, memory, and ephemeral storage for all containers in the namespace.
+        displayName: Limits
+        path: resourceQuotas.limits
+      - description: Kubernetes CPU quantity — whole cores (4) or millicores (500m). Plain integers mean CPU cores, not gibibytes.
+        displayName: Limits CPU
+        path: resourceQuotas.limits.cpu
+      - description: Kubernetes memory or storage quantity with a required unit suffix (e.g. 4Gi, 500Mi, 50Gi). Plain numbers such as 4 are rejected by admission (Kubernetes would treat them as bytes). Lower-case gi/mi are normalized to Gi/Mi.
+        displayName: Limits Memory
+        path: resourceQuotas.limits.memory
+      - description: Kubernetes memory or storage quantity with a required unit suffix (e.g. 4Gi, 500Mi, 50Gi). Plain numbers such as 4 are rejected by admission (Kubernetes would treat them as bytes). Lower-case gi/mi are normalized to Gi/Mi.
+        displayName: Limits Ephemeral Storage
+        path: resourceQuotas.limits.ephemeralStorage
+      - description: Cluster-wide requests on CPU, memory, storage, and ephemeral storage for all containers in the namespace.
+        displayName: Requests
+        path: resourceQuotas.requests
+      - description: Kubernetes CPU quantity — whole cores (4) or millicores (500m). Plain integers mean CPU cores, not gibibytes.
+        displayName: Requests CPU
+        path: resourceQuotas.requests.cpu
+      - description: Kubernetes memory or storage quantity with a required unit suffix (e.g. 4Gi, 500Mi, 50Gi). Plain numbers such as 4 are rejected by admission (Kubernetes would treat them as bytes). Lower-case gi/mi are normalized to Gi/Mi.
+        displayName: Requests Memory
+        path: resourceQuotas.requests.memory
+      - description: Kubernetes memory or storage quantity with a required unit suffix (e.g. 4Gi, 500Mi, 50Gi). Plain numbers such as 4 are rejected by admission (Kubernetes would treat them as bytes). Lower-case gi/mi are normalized to Gi/Mi.
+        displayName: Requests Storage
+        path: resourceQuotas.requests.storage
+      - description: Kubernetes memory or storage quantity with a required unit suffix (e.g. 4Gi, 500Mi, 50Gi). Plain numbers such as 4 are rejected by admission (Kubernetes would treat them as bytes). Lower-case gi/mi are normalized to Gi/Mi.
+        displayName: Requests Ephemeral Storage
+        path: resourceQuotas.requests.ephemeralStorage
+      - description: Per-storage-class quota keys mapped to ResourceQuota hard limits. Use Add entry for each StorageClass key such as bronze.storageclass.storage.k8s.io/requests.storage with value 10Gi.
+        displayName: Storage Classes
+        path: resourceQuotas.storageClasses
+      - description: ResourceQuota hard limit key (StorageClass annotation format).
+        displayName: Key
+        path: resourceQuotas.storageClasses[0].key
+      - description: Quota value for the StorageClass key — use Gi/Mi for .../requests.storage keys (e.g. 10Gi), or a plain integer for count keys such as .../persistentvolumeclaims (e.g. 10).
+        displayName: Value
+        path: resourceQuotas.storageClasses[0].value
+      - description: LimitRange defaults and min/max bounds for pods, containers, and PVCs in the tenant namespace.
+        displayName: Limit Ranges
+        path: limitRanges
+      - description: When enabled, the operator creates or updates a LimitRange in the tenant namespace.
+        displayName: Enabled
+        path: limitRanges.enabled
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
+      - description: Pod-type limits apply to the sum of resources across all containers in a pod.
+        displayName: Pod
+        path: limitRanges.pod
+      - description: Maximum CPU and memory for a pod (sum of its containers).
+        displayName: Pod Max
+        path: limitRanges.pod.max
+      - description: Kubernetes CPU quantity — whole cores (4) or millicores (500m). Plain integers mean CPU cores, not gibibytes.
+        displayName: Pod Max CPU
+        path: limitRanges.pod.max.cpu
+      - description: Kubernetes memory or storage quantity with a required unit suffix (e.g. 4Gi, 500Mi, 50Gi). Plain numbers such as 4 are rejected by admission (Kubernetes would treat them as bytes). Lower-case gi/mi are normalized to Gi/Mi.
+        displayName: Pod Max Memory
+        path: limitRanges.pod.max.memory
+      - description: Minimum CPU and memory for a pod (sum of its containers).
+        displayName: Pod Min
+        path: limitRanges.pod.min
+      - description: Kubernetes CPU quantity — whole cores (4) or millicores (500m). Plain integers mean CPU cores, not gibibytes.
+        displayName: Pod Min CPU
+        path: limitRanges.pod.min.cpu
+      - description: Kubernetes memory or storage quantity with a required unit suffix (e.g. 4Gi, 500Mi, 50Gi). Plain numbers such as 4 are rejected by admission (Kubernetes would treat them as bytes). Lower-case gi/mi are normalized to Gi/Mi.
+        displayName: Pod Min Memory
+        path: limitRanges.pod.min.memory
+      - description: Container-type limits apply per container in a pod.
+        displayName: Container
+        path: limitRanges.container
+      - description: Maximum CPU and memory per container.
+        displayName: Container Max
+        path: limitRanges.container.max
+      - description: Kubernetes CPU quantity — whole cores (4) or millicores (500m). Plain integers mean CPU cores, not gibibytes.
+        displayName: Container Max CPU
+        path: limitRanges.container.max.cpu
+      - description: Kubernetes memory or storage quantity with a required unit suffix (e.g. 4Gi, 500Mi, 50Gi). Plain numbers such as 4 are rejected by admission (Kubernetes would treat them as bytes). Lower-case gi/mi are normalized to Gi/Mi.
+        displayName: Container Max Memory
+        path: limitRanges.container.max.memory
+      - description: Minimum CPU and memory per container.
+        displayName: Container Min
+        path: limitRanges.container.min
+      - description: Kubernetes CPU quantity — whole cores (4) or millicores (500m). Plain integers mean CPU cores, not gibibytes.
+        displayName: Container Min CPU
+        path: limitRanges.container.min.cpu
+      - description: Kubernetes memory or storage quantity with a required unit suffix (e.g. 4Gi, 500Mi, 50Gi). Plain numbers such as 4 are rejected by admission (Kubernetes would treat them as bytes). Lower-case gi/mi are normalized to Gi/Mi.
+        displayName: Container Min Memory
+        path: limitRanges.container.min.memory
+      - description: Default limits applied to containers that specify none.
+        displayName: Container Default
+        path: limitRanges.container.default
+      - description: Kubernetes CPU quantity — whole cores (4) or millicores (500m). Plain integers mean CPU cores, not gibibytes.
+        displayName: Container Default CPU
+        path: limitRanges.container.default.cpu
+      - description: Kubernetes memory or storage quantity with a required unit suffix (e.g. 4Gi, 500Mi, 50Gi). Plain numbers such as 4 are rejected by admission (Kubernetes would treat them as bytes). Lower-case gi/mi are normalized to Gi/Mi.
+        displayName: Container Default Memory
+        path: limitRanges.container.default.memory
+      - description: Default requests applied to containers that specify none.
+        displayName: Container Default Request
+        path: limitRanges.container.defaultRequest
+      - description: Kubernetes CPU quantity — whole cores (4) or millicores (500m). Plain integers mean CPU cores, not gibibytes.
+        displayName: Container Default Request CPU
+        path: limitRanges.container.defaultRequest.cpu
+      - description: Kubernetes memory or storage quantity with a required unit suffix (e.g. 4Gi, 500Mi, 50Gi). Plain numbers such as 4 are rejected by admission (Kubernetes would treat them as bytes). Lower-case gi/mi are normalized to Gi/Mi.
+        displayName: Container Default Request Memory
+        path: limitRanges.container.defaultRequest.memory
+      - description: PVC-type limits apply to PersistentVolumeClaim storage requests.
+        displayName: Persistent Volume Claims
+        path: limitRanges.pvc
+      - description: Minimum storage per PVC.
+        displayName: Persistent Volume Claims Min
+        path: limitRanges.pvc.min
+      - description: Kubernetes memory or storage quantity with a required unit suffix (e.g. 4Gi, 500Mi, 50Gi). Plain numbers such as 4 are rejected by admission (Kubernetes would treat them as bytes). Lower-case gi/mi are normalized to Gi/Mi.
+        displayName: Persistent Volume Claims Min Storage
+        path: limitRanges.pvc.min.storage
+      - description: Maximum storage per PVC.
+        displayName: Persistent Volume Claims Max
+        path: limitRanges.pvc.max
+      - description: Kubernetes memory or storage quantity with a required unit suffix (e.g. 4Gi, 500Mi, 50Gi). Plain numbers such as 4 are rejected by admission (Kubernetes would treat them as bytes). Lower-case gi/mi are normalized to Gi/Mi.
+        displayName: Persistent Volume Claims Max Storage
+        path: limitRanges.pvc.max.storage
       version: v1alpha1
     - description: TShirtSize is a cluster-scoped catalogue entry to pre-define project
         sizes (S, M, L, ...).
       displayName: TShirt Size
       kind: TShirtSize
       name: tshirtsizes.onboarding.stderr.at
+      resources:
+      - kind: ResourceQuota
+        name: resourcequotas
+        version: v1
+      - kind: LimitRange
+        name: limitranges
+        version: v1
+      specDescriptors:
+      - description: Human-readable summary of this T-shirt size (shown in oc/kubectl columns).
+        displayName: Description
+        path: description
+      - description: Resource quota limits for the tenant namespace. Enable reconciliation, then set counts and quantities as needed.
+        displayName: Resource Quotas
+        path: resourceQuotas
+      - description: When enabled, the operator creates or updates a ResourceQuota in the tenant namespace.
+        displayName: Enabled
+        path: resourceQuotas.enabled
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
+      - description: Kubernetes CPU quantity — whole cores (4) or millicores (500m). Plain integers mean CPU cores, not gibibytes.
+        displayName: CPU
+        path: resourceQuotas.cpu
+      - description: Kubernetes memory or storage quantity with a required unit suffix (e.g. 4Gi, 500Mi, 50Gi). Plain numbers such as 4 are rejected by admission (Kubernetes would treat them as bytes). Lower-case gi/mi are normalized to Gi/Mi.
+        displayName: Memory
+        path: resourceQuotas.memory
+      - description: Kubernetes memory or storage quantity with a required unit suffix (e.g. 4Gi, 500Mi, 50Gi). Plain numbers such as 4 are rejected by admission (Kubernetes would treat them as bytes). Lower-case gi/mi are normalized to Gi/Mi.
+        displayName: Ephemeral Storage
+        path: resourceQuotas.ephemeralStorage
+      - description: Maximum number of pods in the namespace.
+        displayName: Pods
+        path: resourceQuotas.pods
+      - description: Maximum number of ReplicationControllers.
+        displayName: Replication Controllers
+        path: resourceQuotas.replicationControllers
+      - description: Maximum number of ResourceQuota objects in the namespace.
+        displayName: Resource Quotas Count
+        path: resourceQuotas.resourceQuotas
+      - description: Maximum number of Services.
+        displayName: Services
+        path: resourceQuotas.services
+      - description: Maximum number of Secrets.
+        displayName: Secrets
+        path: resourceQuotas.secrets
+      - description: Maximum number of ConfigMaps.
+        displayName: ConfigMaps
+        path: resourceQuotas.configMaps
+      - description: Maximum number of PersistentVolumeClaims.
+        displayName: Persistent Volume Claims
+        path: resourceQuotas.persistentVolumeClaims
+      - description: Cluster-wide limits on CPU, memory, and ephemeral storage for all containers in the namespace.
+        displayName: Limits
+        path: resourceQuotas.limits
+      - description: Kubernetes CPU quantity — whole cores (4) or millicores (500m). Plain integers mean CPU cores, not gibibytes.
+        displayName: Limits CPU
+        path: resourceQuotas.limits.cpu
+      - description: Kubernetes memory or storage quantity with a required unit suffix (e.g. 4Gi, 500Mi, 50Gi). Plain numbers such as 4 are rejected by admission (Kubernetes would treat them as bytes). Lower-case gi/mi are normalized to Gi/Mi.
+        displayName: Limits Memory
+        path: resourceQuotas.limits.memory
+      - description: Kubernetes memory or storage quantity with a required unit suffix (e.g. 4Gi, 500Mi, 50Gi). Plain numbers such as 4 are rejected by admission (Kubernetes would treat them as bytes). Lower-case gi/mi are normalized to Gi/Mi.
+        displayName: Limits Ephemeral Storage
+        path: resourceQuotas.limits.ephemeralStorage
+      - description: Cluster-wide requests on CPU, memory, storage, and ephemeral storage for all containers in the namespace.
+        displayName: Requests
+        path: resourceQuotas.requests
+      - description: Kubernetes CPU quantity — whole cores (4) or millicores (500m). Plain integers mean CPU cores, not gibibytes.
+        displayName: Requests CPU
+        path: resourceQuotas.requests.cpu
+      - description: Kubernetes memory or storage quantity with a required unit suffix (e.g. 4Gi, 500Mi, 50Gi). Plain numbers such as 4 are rejected by admission (Kubernetes would treat them as bytes). Lower-case gi/mi are normalized to Gi/Mi.
+        displayName: Requests Memory
+        path: resourceQuotas.requests.memory
+      - description: Kubernetes memory or storage quantity with a required unit suffix (e.g. 4Gi, 500Mi, 50Gi). Plain numbers such as 4 are rejected by admission (Kubernetes would treat them as bytes). Lower-case gi/mi are normalized to Gi/Mi.
+        displayName: Requests Storage
+        path: resourceQuotas.requests.storage
+      - description: Kubernetes memory or storage quantity with a required unit suffix (e.g. 4Gi, 500Mi, 50Gi). Plain numbers such as 4 are rejected by admission (Kubernetes would treat them as bytes). Lower-case gi/mi are normalized to Gi/Mi.
+        displayName: Requests Ephemeral Storage
+        path: resourceQuotas.requests.ephemeralStorage
+      - description: Per-storage-class quota keys mapped to ResourceQuota hard limits. Use Add entry for each StorageClass key such as bronze.storageclass.storage.k8s.io/requests.storage with value 10Gi.
+        displayName: Storage Classes
+        path: resourceQuotas.storageClasses
+      - description: ResourceQuota hard limit key (StorageClass annotation format).
+        displayName: Key
+        path: resourceQuotas.storageClasses[0].key
+      - description: Quota value for the StorageClass key — use Gi/Mi for .../requests.storage keys (e.g. 10Gi), or a plain integer for count keys such as .../persistentvolumeclaims (e.g. 10).
+        displayName: Value
+        path: resourceQuotas.storageClasses[0].value
+      - description: LimitRange defaults and min/max bounds for pods, containers, and PVCs in the tenant namespace.
+        displayName: Limit Ranges
+        path: limitRanges
+      - description: When enabled, the operator creates or updates a LimitRange in the tenant namespace.
+        displayName: Enabled
+        path: limitRanges.enabled
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
+      - description: Pod-type limits apply to the sum of resources across all containers in a pod.
+        displayName: Pod
+        path: limitRanges.pod
+      - description: Maximum CPU and memory for a pod (sum of its containers).
+        displayName: Pod Max
+        path: limitRanges.pod.max
+      - description: Kubernetes CPU quantity — whole cores (4) or millicores (500m). Plain integers mean CPU cores, not gibibytes.
+        displayName: Pod Max CPU
+        path: limitRanges.pod.max.cpu
+      - description: Kubernetes memory or storage quantity with a required unit suffix (e.g. 4Gi, 500Mi, 50Gi). Plain numbers such as 4 are rejected by admission (Kubernetes would treat them as bytes). Lower-case gi/mi are normalized to Gi/Mi.
+        displayName: Pod Max Memory
+        path: limitRanges.pod.max.memory
+      - description: Minimum CPU and memory for a pod (sum of its containers).
+        displayName: Pod Min
+        path: limitRanges.pod.min
+      - description: Kubernetes CPU quantity — whole cores (4) or millicores (500m). Plain integers mean CPU cores, not gibibytes.
+        displayName: Pod Min CPU
+        path: limitRanges.pod.min.cpu
+      - description: Kubernetes memory or storage quantity with a required unit suffix (e.g. 4Gi, 500Mi, 50Gi). Plain numbers such as 4 are rejected by admission (Kubernetes would treat them as bytes). Lower-case gi/mi are normalized to Gi/Mi.
+        displayName: Pod Min Memory
+        path: limitRanges.pod.min.memory
+      - description: Container-type limits apply per container in a pod.
+        displayName: Container
+        path: limitRanges.container
+      - description: Maximum CPU and memory per container.
+        displayName: Container Max
+        path: limitRanges.container.max
+      - description: Kubernetes CPU quantity — whole cores (4) or millicores (500m). Plain integers mean CPU cores, not gibibytes.
+        displayName: Container Max CPU
+        path: limitRanges.container.max.cpu
+      - description: Kubernetes memory or storage quantity with a required unit suffix (e.g. 4Gi, 500Mi, 50Gi). Plain numbers such as 4 are rejected by admission (Kubernetes would treat them as bytes). Lower-case gi/mi are normalized to Gi/Mi.
+        displayName: Container Max Memory
+        path: limitRanges.container.max.memory
+      - description: Minimum CPU and memory per container.
+        displayName: Container Min
+        path: limitRanges.container.min
+      - description: Kubernetes CPU quantity — whole cores (4) or millicores (500m). Plain integers mean CPU cores, not gibibytes.
+        displayName: Container Min CPU
+        path: limitRanges.container.min.cpu
+      - description: Kubernetes memory or storage quantity with a required unit suffix (e.g. 4Gi, 500Mi, 50Gi). Plain numbers such as 4 are rejected by admission (Kubernetes would treat them as bytes). Lower-case gi/mi are normalized to Gi/Mi.
+        displayName: Container Min Memory
+        path: limitRanges.container.min.memory
+      - description: Default limits applied to containers that specify none.
+        displayName: Container Default
+        path: limitRanges.container.default
+      - description: Kubernetes CPU quantity — whole cores (4) or millicores (500m). Plain integers mean CPU cores, not gibibytes.
+        displayName: Container Default CPU
+        path: limitRanges.container.default.cpu
+      - description: Kubernetes memory or storage quantity with a required unit suffix (e.g. 4Gi, 500Mi, 50Gi). Plain numbers such as 4 are rejected by admission (Kubernetes would treat them as bytes). Lower-case gi/mi are normalized to Gi/Mi.
+        displayName: Container Default Memory
+        path: limitRanges.container.default.memory
+      - description: Default requests applied to containers that specify none.
+        displayName: Container Default Request
+        path: limitRanges.container.defaultRequest
+      - description: Kubernetes CPU quantity — whole cores (4) or millicores (500m). Plain integers mean CPU cores, not gibibytes.
+        displayName: Container Default Request CPU
+        path: limitRanges.container.defaultRequest.cpu
+      - description: Kubernetes memory or storage quantity with a required unit suffix (e.g. 4Gi, 500Mi, 50Gi). Plain numbers such as 4 are rejected by admission (Kubernetes would treat them as bytes). Lower-case gi/mi are normalized to Gi/Mi.
+        displayName: Container Default Request Memory
+        path: limitRanges.container.defaultRequest.memory
+      - description: PVC-type limits apply to PersistentVolumeClaim storage requests.
+        displayName: Persistent Volume Claims
+        path: limitRanges.pvc
+      - description: Minimum storage per PVC.
+        displayName: Persistent Volume Claims Min
+        path: limitRanges.pvc.min
+      - description: Kubernetes memory or storage quantity with a required unit suffix (e.g. 4Gi, 500Mi, 50Gi). Plain numbers such as 4 are rejected by admission (Kubernetes would treat them as bytes). Lower-case gi/mi are normalized to Gi/Mi.
+        displayName: Persistent Volume Claims Min Storage
+        path: limitRanges.pvc.min.storage
+      - description: Maximum storage per PVC.
+        displayName: Persistent Volume Claims Max
+        path: limitRanges.pvc.max
+      - description: Kubernetes memory or storage quantity with a required unit suffix (e.g. 4Gi, 500Mi, 50Gi). Plain numbers such as 4 are rejected by admission (Kubernetes would treat them as bytes). Lower-case gi/mi are normalized to Gi/Mi.
+        displayName: Persistent Volume Claims Max Storage
+        path: limitRanges.pvc.max.storage
       version: v1beta1
   description: |
     Operator for OpenShift project/tenant onboarding. Reconciles tenant Namespaces, ResourceQuotas,
