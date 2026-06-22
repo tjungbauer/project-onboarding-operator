@@ -39,6 +39,9 @@ jobs:
           VERSION="$(tr -d ' \n\r' < VERSION)"
           grep -q "version: ${VERSION}" bundle/manifests/project-onboarding-operator.clusterserviceversion.yaml
           test ! -f bundle/manifests/controller-manager-rules_monitoring.coreos.com_v1_prometheusrule.yaml
+          ! compgen -G "bundle/manifests/*networkpolicy*.yaml" > /dev/null
+          grep -q 'metadata.annotations.support:' bundle/manifests/project-onboarding-operator.clusterserviceversion.yaml
+          awk '/^metadata:/{m=1} m && /^  annotations:/{a=1} a && /^    description:/{found=1; exit} END{exit !found}' bundle/manifests/project-onboarding-operator.clusterserviceversion.yaml
 
       - name: Check committed bundle matches generated output
         run: git diff --exit-code bundle/

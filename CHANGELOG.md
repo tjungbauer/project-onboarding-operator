@@ -6,9 +6,14 @@ All notable changes to this project are documented here. Version numbers match O
 
 ## [0.0.51] - 2026-06-22
 
+### Added
+
+- Community OperatorHub bundle prep: `make bundle-community`, `scripts/prepare-community-bundle.sh`, `scripts/validate-community-bundle.sh`, and [docs/operatorhub-community-submission.md](docs/operatorhub-community-submission.md).
+
 ### Fixed
 
 - Remove duplicate SCC `ClusterRoleBinding` from OLM bundle (`normalize-bundle-monitoring.sh` promotes a single prefixed binding).
+- Strip operator-namespace `NetworkPolicy` manifests from OLM bundles (OLM cannot install them); add required CSV `description` and `metadata.annotations.support` annotations for OperatorHub.
 - Helm chart catalog/subscription versions default from `Chart.yaml` `appVersion` (sync with repo `VERSION` on release).
 
 ### Changed

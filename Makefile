@@ -335,11 +335,25 @@ bundle: generate-csv-icon manifests kustomize operator-sdk ## Generate bundle ma
 	python3 scripts/pin-bundle-created-at.py
 	@chmod +x scripts/normalize-bundle-monitoring.sh
 	@scripts/normalize-bundle-monitoring.sh
+	@chmod +x scripts/strip-bundle-operator-networkpolicies.sh
+	@scripts/strip-bundle-operator-networkpolicies.sh
+	@chmod +x scripts/patch-bundle-openshift-versions.sh
+	@scripts/patch-bundle-openshift-versions.sh
 	@if [ -n "$(PREV_VERSION)" ]; then \
 		$(KUSTOMIZE) version --short 2>/dev/null | grep -q v5 || true; \
 		python3 -c "import pathlib,re; p=pathlib.Path('bundle/manifests/project-onboarding-operator.clusterserviceversion.yaml'); t=p.read_text(); t=re.sub(r'^  replaces:.*\n','',t,flags=re.M); t=t.replace('  version: $(VERSION)\n','  replaces: project-onboarding-operator.v$(PREV_VERSION)\n  version: $(VERSION)\n',1); p.write_text(t)"; \
 	fi
 	$(OPERATOR_SDK) bundle validate ./bundle
+
+.PHONY: bundle-community
+bundle-community: bundle ## Prepare dist/community-bundle/<VERSION> for community-operators-prod (digest-pinned).
+	@chmod +x scripts/prepare-community-bundle.sh
+	@scripts/prepare-community-bundle.sh
+
+.PHONY: validate-community-bundle
+validate-community-bundle: ## Validate dist/community-bundle/<VERSION> with OLM community validators.
+	@chmod +x scripts/validate-community-bundle.sh
+	@scripts/validate-community-bundle.sh
 
 .PHONY: scorecard
 scorecard: bundle ## Run operator-sdk scorecard tests against the bundle.

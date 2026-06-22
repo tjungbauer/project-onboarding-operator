@@ -1,6 +1,6 @@
 # Install via OpenShift OperatorHub (UI)
 
-Use this path to install from **Operators → OperatorHub** instead of `operator-sdk run bundle`. This is the most convenient way to deploy. The steps below create a custom CatalogSource. A native community operator release may follow later.
+Use this path to install from **Operators → OperatorHub** instead of `operator-sdk run bundle`. This is the most convenient way to deploy. The steps below create a custom CatalogSource. For the **official Red Hat community OperatorHub** listing, see [operatorhub-community-submission.md](operatorhub-community-submission.md).
 
 Set the release version once (must match the `VERSION` file). From the repository root:
 

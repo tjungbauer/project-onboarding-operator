@@ -5,6 +5,9 @@ metadata:
     alm-examples: '[]'
     capabilities: Full Lifecycle
     categories: OpenShift Optional
+    description: Operator for OpenShift project and tenant onboarding from a ProjectOnboarding
+      custom resource.
+    metadata.annotations.support: Community
     operatorframework.io/suggested-namespace: project-onboarding-operator
     repository: https://github.com/tjungbauer/project-onboarding-operator
   name: project-onboarding-operator.v0.0.0

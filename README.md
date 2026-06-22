@@ -56,6 +56,7 @@ Start with [docs/install.md](docs/install.md), then [docs/guide.md](docs/guide.m
 | **Install (all paths)** — start here | [docs/install.md](docs/install.md) |
 | **User guide** — CRs, console form, lifecycle | [docs/guide.md](docs/guide.md) |
 | OpenShift OperatorHub (UI) | [docs/operatorhub-install.md](docs/operatorhub-install.md) |
+| Community OperatorHub submission | [docs/operatorhub-community-submission.md](docs/operatorhub-community-submission.md) |
 | OpenShift OLM install (CLI) | [docs/openshift-install.md](docs/openshift-install.md) |
 | **Upgrade** (operator-sdk vs OperatorHub) | [docs/upgrade.md](docs/upgrade.md) |
 | Architecture | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
