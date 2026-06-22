@@ -48,7 +48,7 @@ jobs:
           CONTAINER_TOOL: docker
         run: |
           VERSION="$(tr -d ' \n\r' < VERSION)"
-          BUNDLE_IMG="quay.io/tjungbau/project-onboarding-operator-bundle:v${VERSION}"
+          BUNDLE_IMG="example.com/project-onboarding-operator-bundle:v${VERSION}"
           CATALOG_IMG="example.com/project-onboarding-operator-catalog:v${VERSION}"
           make bundle-build BUNDLE_IMG="${BUNDLE_IMG}" CONTAINER_TOOL=docker
           make catalog-build CATALOG_IMG="${CATALOG_IMG}" BUNDLE_IMGS="${BUNDLE_IMG}" CONTAINER_TOOL=docker PLATFORM=linux/amd64

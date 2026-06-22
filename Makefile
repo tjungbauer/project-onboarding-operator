@@ -391,11 +391,12 @@ endif
 PLATFORM ?= linux/amd64
 
 # opm tool flags: when adding to an existing index (--from-index), pull from registry.
-# For fresh/local bundle images (CI), use --pull-tool none + --build-tool (not --container-tool).
+# For fresh/local bundle images (CI), use --pull-tool none + --build-tool + --permissive
+# (opm still probes the registry; permissive allows using the local docker image).
 ifneq ($(strip $(FROM_INDEX_OPT)),)
 OPM_TOOL_ARGS := --container-tool $(CONTAINER_TOOL)
 else
-OPM_TOOL_ARGS := --pull-tool none --build-tool $(CONTAINER_TOOL)
+OPM_TOOL_ARGS := --pull-tool none --build-tool $(CONTAINER_TOOL) --permissive
 endif
 
 # Build a catalog image by adding bundle images to an empty catalog using the operator package manager tool, 'opm'.
