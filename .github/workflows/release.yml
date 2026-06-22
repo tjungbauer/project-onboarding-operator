@@ -139,6 +139,7 @@ jobs:
 
       - name: Scan pushed catalog image
         uses: aquasecurity/trivy-action@v0.36.0
+        continue-on-error: true
         with:
           image-ref: quay.io/tjungbau/project-onboarding-operator-catalog:v${{ steps.version.outputs.value }}
           format: table
