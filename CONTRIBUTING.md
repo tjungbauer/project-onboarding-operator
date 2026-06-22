@@ -15,18 +15,25 @@ Install paths: [docs/install.md](docs/install.md).
 
 ## Release checklist (maintainers)
 
-1. Ensure `[Unreleased]` in `CHANGELOG.md` is complete and `[Unreleased]` is empty after the version section is added.
-2. Bump `VERSION`, run `make bundle`, commit `bundle/` changes.
-3. Tag `vX.Y.Z` and push — the release workflow runs unit tests, Kind E2E, bundle drift check, operator-sdk scorecard, then publishes to Quay, **signs images (cosign)**, attaches **SPDX SBOMs**, and uploads SBOMs to the GitHub Release. See [docs/supply-chain.md](docs/supply-chain.md).
+1. Optional: refresh HI digests when adopting new Red Hat Hardened Image bases:
+   ```bash
+   ./hack/resolve-hi-digests.sh
+   git add build/hi-images.lock
+   ```
+2. Ensure `[Unreleased]` in `CHANGELOG.md` is complete; move entries into `[X.Y.Z] - YYYY-MM-DD` and clear `[Unreleased]`.
+3. Bump `VERSION`, run `make bundle`, commit `bundle/` changes.
+4. Run `./scripts/pre-release-check.sh` locally (or use **Actions → Release → Run workflow** dry-run).
+5. Tag `vX.Y.Z` and push — the release workflow validates, publishes to Quay, **signs images (cosign)**, attaches **SPDX SBOMs**, and creates the GitHub Release. See [docs/supply-chain.md](docs/supply-chain.md).
 
-Optional GitHub secrets:
+### Release dry-run (no publish)
 
-- `COSIGN_PRIVATE_KEY` + `COSIGN_PASSWORD` for static signing instead of keyless OIDC
-- `OPENSHIFT_KUBECONFIG` (base64 kubeconfig) — optional; enables OpenShift E2E (TC-00–TC-14). Without it, that workflow skips cleanly.
+**Actions → Release → Run workflow** with version `X.Y.Z` (must match `VERSION` in the repo). Runs tests, Kind E2E, bundle drift, and scorecard only. Publish runs automatically on **tag push**, not on workflow_dispatch.
 
-## Branch protection (recommended)
+## Branch protection
 
-On GitHub **Settings → Branches → main**, enable required status checks before merge:
+See **[docs/branch-protection.md](docs/branch-protection.md)** for step-by-step setup of required status checks on `main`.
+
+Summary — enable on **Settings → Branches → main**:
 
 | Check | Workflow |
 |-------|----------|
@@ -40,6 +47,11 @@ On GitHub **Settings → Branches → main**, enable required status checks befo
 | OpenShift test cases (TC-00–TC-14) | `test-e2e-openshift.yml` (optional; skips when secret not set) |
 
 Require branches to be up to date before merging.
+
+Optional GitHub secrets:
+
+- `COSIGN_PRIVATE_KEY` + `COSIGN_PASSWORD` for static signing instead of keyless OIDC
+- `OPENSHIFT_KUBECONFIG` (base64 kubeconfig) — optional; enables OpenShift E2E (TC-00–TC-14). Without it, that workflow skips cleanly.
 
 ## Code layout
 

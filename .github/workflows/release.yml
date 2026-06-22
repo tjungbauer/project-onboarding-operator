@@ -7,8 +7,12 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: Release version without v prefix (e.g. 0.0.14)
+        description: Release version without v prefix (e.g. 0.0.49) — must match VERSION file for bundle drift check
         required: true
+      dry_run:
+        description: Validate only (default). Publish runs automatically on tag push, not on workflow_dispatch.
+        type: boolean
+        default: true
 
 jobs:
   validate:
@@ -33,6 +37,11 @@ jobs:
           chmod +x operator-sdk
           sudo mv operator-sdk /usr/local/bin/operator-sdk
           operator-sdk version
+
+      - name: Verify HI image lock
+        run: |
+          chmod +x hack/resolve-hi-digests.sh
+          hack/resolve-hi-digests.sh --check
 
       - name: Unit tests
         run: make test
@@ -87,6 +96,12 @@ jobs:
         if: always()
         run: make cleanup-test-e2e
 
+      - name: Dry-run summary
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          echo "Release dry-run completed for version ${{ steps.version.outputs.value }}."
+          echo "To publish: commit VERSION + bundle/, tag v${{ steps.version.outputs.value }}, and push the tag."
+
   publish:
     name: Build, scan, and push images
     needs: validate
@@ -101,6 +116,11 @@ jobs:
       - name: Resolve version
         id: version
         run: echo "value=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Pre-release checks
+        run: |
+          chmod +x scripts/pre-release-check.sh hack/resolve-hi-digests.sh
+          ./scripts/pre-release-check.sh "${{ steps.version.outputs.value }}"
 
       - name: Log in to Quay
         uses: docker/login-action@v3

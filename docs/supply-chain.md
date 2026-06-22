@@ -79,6 +79,25 @@ SKIP_SIGN=true ./scripts/sign-release-images.sh "${VERSION}"   # SBOM only
 SKIP_SBOM=true ./scripts/sign-release-images.sh "${VERSION}"   # sign only
 ```
 
+## SLSA provenance (current scope)
+
+| Artifact | Today | Not yet |
+| -------- | ----- | ------- |
+| Release images | **cosign** signatures (keyless OIDC in CI) | SLSA build attestations |
+| SBOM | **SPDX** attached via cosign + GitHub Release assets | — |
+
+We do **not** publish [SLSA](https://slsa.dev/) build provenance attestations yet. Consumers can verify image signatures and SPDX SBOMs as documented above. Build attestations are planned for a future release.
+
+## Container vulnerability scanning (Trivy)
+
+| Image | PR security workflow | Release workflow |
+| ----- | -------------------- | ---------------- |
+| Operator | **Blocking** (CRITICAL/HIGH, unfixed only) | **Blocking** |
+| Bundle | **Blocking** | **Blocking** |
+| Catalog | **Informational** (`continue-on-error`) | **Informational** (`continue-on-error`) |
+
+The catalog index image is built from **`opm`** base images. Those bases carry **HIGH** CVEs that this project cannot patch directly. We still build and scan the catalog in CI for visibility, but failures do not block merges or releases.
+
 ## Pinned base images (Red Hat Hardened Images)
 
 CI and release builds for **linux/amd64** pin HI images by digest via `build/hi-images.lock` and `scripts/hi-build-args.sh`. The `Dockerfile` defaults to `:latest-builder` / `:latest` so local builds on other architectures still work.
@@ -89,6 +108,8 @@ CI and release builds for **linux/amd64** pin HI images by digest via `build/hi-
 ./hack/resolve-hi-digests.sh   # reads multi-arch manifests, writes linux/amd64 @sha256 into build/hi-images.lock
 git add build/hi-images.lock
 ```
+
+**Release / CI verification:** The Release workflow and `./scripts/pre-release-check.sh` run `./hack/resolve-hi-digests.sh --check` to fail if the lock file drifts from the registry (refresh the lock before tagging).
 
 You do **not** edit digests by hand for routine operator upgrades — only when bumping HI base images. Operator cluster upgrades still use version tags (`./scripts/upgrade-cluster.sh X.Y.Z`).
 

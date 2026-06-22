@@ -4,11 +4,25 @@ All notable changes to this project are documented here. Version numbers match O
 
 ## [Unreleased]
 
+## [0.0.49] - 2026-06-22
+
+### Added
+
+- `hack/resolve-hi-digests.sh --check` and `scripts/pre-release-check.sh` — verify HI lock before release.
+- `docs/branch-protection.md` — enable required CI checks on `main`.
+- Release workflow `workflow_dispatch` dry-run (validate only; publish on tag push).
+- Grafana import steps for OpenShift monitoring; Alertmanager routing guide in [docs/metrics.md](docs/metrics.md).
+- SLSA / provenance scope documented in [docs/supply-chain.md](docs/supply-chain.md).
+
+### Changed
+
+- CI: PR security workflow builds catalog locally and runs informational catalog Trivy (`continue-on-error`).
+- Release publish job runs pre-release checks and HI digest verification.
+- Corrected [0.0.48] changelog entries for items that were reverted or never shipped.
+
 ### Fixed
 
-- CI: OpenShift E2E skips when `OPENSHIFT_KUBECONFIG` is unset (no longer fails `main` pushes).
-- CI: `catalog-build` uses local bundle images (`--pull-tool none --build-tool`) in PR validation.
-- CI: Security workflow scans operator and bundle images only (catalog inherits opm CVEs).
+- CI fixes from post-0.0.48: OpenShift E2E skip without secret, opm catalog-build flags, security scan scope.
 
 ## [0.0.48] - 2026-06-22
 
@@ -26,12 +40,11 @@ All notable changes to this project are documented here. Version numbers match O
 
 ### Changed
 
-- `release-openshift.sh`: `UPGRADE=true` delegates to `upgrade-cluster.sh`; published bundle uses `USE_IMAGE_DIGESTS=true` after operator image push.
-- CI: bundle scorecard builds and loads the PR operator image into Kind; installs OLM for integration tests.
+- `release-openshift.sh`: `UPGRADE=true` delegates to `upgrade-cluster.sh`; clearer separation of publish vs cluster upgrade.
+- CI: bundle scorecard builds and loads the PR operator image into Kind.
 - CI: release scorecard uses the same PR-built image as Kind E2E (not pre-published Quay).
 - CI: catalog index build validated on pull requests.
-- CI: Trivy scans operator, bundle, and catalog images (security + release workflows).
-- CI: OpenShift E2E fails on `main` / schedule when `OPENSHIFT_KUBECONFIG` is missing.
+- CI: Trivy scans operator and bundle images in PR security workflow.
 - Expanded [SECURITY.md](SECURITY.md) with supported versions, disclosure timeline, and scope.
 - [CONTRIBUTING.md](CONTRIBUTING.md): recommended branch protection checks.
 - [docs/supply-chain.md](docs/supply-chain.md): pinned HI images and OLM digest policy.

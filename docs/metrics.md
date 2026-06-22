@@ -69,7 +69,54 @@ Ensure your Prometheus `ruleSelector` includes the operator’s `PrometheusRule`
 
 ## Grafana dashboard
 
-Import [grafana/dashboard.json](grafana/dashboard.json) into Grafana (Dashboards → Import). Panels cover tenant count, reconcile errors, workqueue depth, and controller deployment availability.
+Import [grafana/dashboard.json](grafana/dashboard.json) into Grafana. Panels cover tenant count, reconcile errors, workqueue depth, and controller deployment availability.
+
+### OpenShift cluster monitoring (one-click import)
+
+When **user-workload monitoring** or a Grafana instance backed by OpenShift monitoring is available:
+
+1. Open the **Developer** or **Administrator** perspective → **Observe** → **Dashboards** (or your Grafana route, e.g. `grafana-openshift-monitoring` in `openshift-monitoring`).
+2. **Dashboards** → **Import** → **Upload JSON file** (or paste JSON).
+3. Select `docs/grafana/dashboard.json` from this repository (or download from the matching Git tag on GitHub).
+4. Choose the Prometheus data source that scrapes the operator namespace (often **Prometheus** / **User Workload Monitoring**).
+5. Save. Panels use the same metric names as the bundled `PrometheusRule`.
+
+For clusters without the OpenShift Grafana UI, import the same JSON into any Grafana with a Prometheus data source that can query the operator metrics.
+
+## Alert routing (Alertmanager → on-call)
+
+Bundled `PrometheusRule` alerts are evaluated by Prometheus; **Alertmanager** routes firing alerts to receivers (PagerDuty, Slack, email, webhooks).
+
+### OpenShift platform monitoring
+
+1. Confirm `PrometheusRule` objects exist in the operator namespace (`oc get prometheusrule -n project-onboarding-operator`).
+2. Open **Administrator** → **Observe** → **Alerting** → **Alertmanager** (or the Alertmanager route in `openshift-monitoring`).
+3. Configure **Receivers** and **Routes** for your team. Example route matchers:
+   - `severity=critical` → on-call (e.g. `ProjectOnboardingOperatorDown`)
+   - `severity=warning` → team Slack channel (reconcile errors, workqueue backlog)
+
+OpenShift copies cluster monitoring Alertmanager config from secrets/config in `openshift-monitoring`. For user-workload monitoring, use the UWM Alertmanager instance and label selectors that include rules in your operator namespace.
+
+### Self-managed Prometheus Operator
+
+In your `Alertmanager` CR (or `alertmanager.yaml`), add routes such as:
+
+```yaml
+route:
+  receiver: default
+  routes:
+    - matchers:
+        - alertname = ProjectOnboardingOperatorDown
+      receiver: oncall-pagerduty
+      continue: false
+    - matchers:
+        - alertname =~ "ProjectOnboarding.*|TShirtSize.*"
+      receiver: team-slack
+```
+
+Define `receivers` with your PagerDuty integration key, Slack webhook, or SMTP settings. Test with **Alertmanager → Status → Silences** disabled and a synthetic alert, or temporarily lower `for:` in a test `PrometheusRule`.
+
+Operational response steps: [runbook.md — Alert response](runbook.md#alert-response).
 
 ## Prerequisites
 

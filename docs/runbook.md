@@ -229,7 +229,7 @@ Ensure cert-manager is installed and `config/overlays/local` is used (`make depl
 | `projectonboarding_tenants_total{project_onboarding="..."}` | Active tenant entries per CR |
 | `controller_runtime_reconcile_errors_total{controller="projectonboarding"}` | Controller-runtime aggregate |
 
-See [metrics.md](metrics.md) for scrape setup and alert rules.
+See [metrics.md](metrics.md) for scrape setup, Grafana import, and Alertmanager routing.
 
 **Common reasons:**
 
@@ -254,6 +254,22 @@ Enable debug logging temporarily:
 ```bash
 oc set env deployment/project-onboarding-operator-controller-manager -n "${OPERATOR_NS}" DEBUG=true
 ```
+
+---
+
+## Alert response
+
+When Alertmanager notifies your on-call channel, use the alert name to pick the first action. Configure routes in [metrics.md — Alert routing](metrics.md#alert-routing-alertmanager--on-call).
+
+| Alert | Severity | First response |
+| ----- | -------- | -------------- |
+| `ProjectOnboardingOperatorDown` | critical | Check controller deployment and pods in the operator namespace; restore replicas or roll back CSV if upgrade-related. |
+| `ProjectOnboardingReconcileErrors` | warning | Inspect controller logs and `ProjectOnboarding` status; see [Reconcile errors](#reconcile-errors). |
+| `ProjectOnboardingReconcileErrorsByReason` | warning | Focus on the `reason` label in the alert; match to the table in [Reconcile errors](#reconcile-errors). |
+| `ProjectOnboardingWorkqueueBacklog` | warning | Look for API slowness, RBAC denials, or a hot-looping CR; check `workqueue_depth` in Grafana. |
+| `TShirtSizeReconcileErrors` | warning | Validate `TShirtSize` CRs and webhook/cert health. |
+
+Silence alerts only after confirming the underlying issue is resolved or during a planned maintenance window.
 
 ---
 

@@ -6,8 +6,8 @@ Security fixes are provided for the **latest minor release** only.
 
 | Version | Supported |
 |---------|-----------|
-| 0.0.48+ | Yes |
-| 0.0.47 and older | No — upgrade to the latest release |
+| 0.0.49+ | Yes |
+| 0.0.48 and older | No — upgrade to the latest release |
 
 Supported release artifacts:
 
