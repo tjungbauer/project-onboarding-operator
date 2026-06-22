@@ -12,14 +12,23 @@ spec:
     rules:
     - alert: ProjectOnboardingOperatorDown
       annotations:
-        description: No available replicas for project-onboarding-operator-controller-manager
-          in project-onboarding-operator for 5 minutes.
+        description: Metrics scrape or deployment availability indicates project-onboarding-operator-controller-manager
+          is unavailable in project-onboarding-operator for 5 minutes.
         summary: Project Onboarding operator controller is down
       expr: |
-        kube_deployment_status_replicas_available{
-          namespace="project-onboarding-operator",
-          deployment="project-onboarding-operator-controller-manager"
-        } < 1
+        (
+          sum(up{
+            namespace="project-onboarding-operator",
+            service=~".*controller-manager-metrics-service"
+          } == 1) < 1
+        )
+        or
+        (
+          kube_deployment_status_replicas_available{
+            namespace="project-onboarding-operator",
+            deployment="project-onboarding-operator-controller-manager"
+          } < 1
+        )
       for: 5m
       labels:
         severity: critical
@@ -63,3 +72,7 @@ spec:
       for: 10m
       labels:
         severity: warning
+    - expr: sum(rate(projectonboarding_reconcile_errors_total[5m]))
+      record: projectonboarding:reconcile_error_rate5m
+    - expr: sum(projectonboarding_tenants_total)
+      record: projectonboarding:tenant_count

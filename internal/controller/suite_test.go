@@ -32,7 +32,6 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	onboardingv1alpha1 "github.com/tjungbauer/project-onboarding-operator/api/v1alpha1"
 	onboardingv1beta1 "github.com/tjungbauer/project-onboarding-operator/api/v1beta1"
 )
 
@@ -59,8 +58,6 @@ var _ = BeforeSuite(func() {
 	ctx, cancel = context.WithCancel(context.TODO())
 
 	var err error
-	err = onboardingv1alpha1.AddToScheme(scheme.Scheme)
-	Expect(err).NotTo(HaveOccurred())
 	err = onboardingv1beta1.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
 

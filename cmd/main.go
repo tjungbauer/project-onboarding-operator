@@ -40,7 +40,6 @@ import (
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
-	onboardingv1alpha1 "github.com/tjungbauer/project-onboarding-operator/api/v1alpha1"
 	onboardingv1beta1 "github.com/tjungbauer/project-onboarding-operator/api/v1beta1"
 	"github.com/tjungbauer/project-onboarding-operator/internal/controller"
 	"github.com/tjungbauer/project-onboarding-operator/internal/validation"
@@ -56,7 +55,6 @@ var (
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 
-	utilruntime.Must(onboardingv1alpha1.AddToScheme(scheme))
 	utilruntime.Must(onboardingv1beta1.AddToScheme(scheme))
 	// +kubebuilder:scaffold:scheme
 }
@@ -190,14 +188,6 @@ func main() {
 	}
 	if err := operwebhook.SetupTShirtSizeWebhookWithManager(mgr, validator); err != nil {
 		setupLog.Error(err, "unable to create webhook", "webhook", "TShirtSize")
-		os.Exit(1)
-	}
-	if err := ctrl.NewWebhookManagedBy(mgr).For(&onboardingv1beta1.ProjectOnboarding{}).Complete(); err != nil {
-		setupLog.Error(err, "unable to create conversion webhook", "webhook", "ProjectOnboarding")
-		os.Exit(1)
-	}
-	if err := ctrl.NewWebhookManagedBy(mgr).For(&onboardingv1beta1.TShirtSize{}).Complete(); err != nil {
-		setupLog.Error(err, "unable to create conversion webhook", "webhook", "TShirtSize")
 		os.Exit(1)
 	}
 

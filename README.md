@@ -59,7 +59,11 @@ Start with [docs/install.md](docs/install.md), then [docs/guide.md](docs/guide.m
 | OpenShift OLM install (CLI) | [docs/openshift-install.md](docs/openshift-install.md) |
 | **Upgrade** (operator-sdk vs OperatorHub) | [docs/upgrade.md](docs/upgrade.md) |
 | Architecture | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
-| API design and versioning (`v1alpha1` / `v1beta1`) | [docs/api-design.md](docs/api-design.md) |
+| API design (`v1beta1`) | [docs/api-design.md](docs/api-design.md) |
+| Disaster recovery | [docs/disaster-recovery.md](docs/disaster-recovery.md) |
+| SLOs / error budgets | [docs/slo.md](docs/slo.md) |
+| Capacity / performance | [docs/capacity-performance.md](docs/capacity-performance.md) |
+| Helm chart (OLM install) | [charts/project-onboarding-operator/README.md](charts/project-onboarding-operator/README.md) |
 | T-shirt sizing (`TShirtSize`, `projectSize`) | [docs/project-size.md](docs/project-size.md) |
 | Metrics & ServiceMonitor | [docs/metrics.md](docs/metrics.md) |
 | Cluster GitOps defaults (`onboarding-defaults` ConfigMap) | [docs/cluster-defaults.md](docs/cluster-defaults.md) |

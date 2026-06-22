@@ -276,7 +276,7 @@ metadata:
 
 		It("should reject a TShirtSize without sizing via API validation", func() {
 			By("applying an invalid TShirtSize with server dry-run")
-			manifest := `apiVersion: onboarding.stderr.at/v1alpha1
+			manifest := `apiVersion: onboarding.stderr.at/v1beta1
 kind: TShirtSize
 metadata:
   name: e2e-invalid-size

@@ -1,4 +1,4 @@
-apiVersion: onboarding.stderr.at/v1alpha1
+apiVersion: onboarding.stderr.at/v1beta1
 kind: ProjectOnboarding
 metadata:
   name: e2e-onboarding

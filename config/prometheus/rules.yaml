@@ -15,16 +15,25 @@ spec:
       rules:
         - alert: ProjectOnboardingOperatorDown
           expr: |
-            kube_deployment_status_replicas_available{
-              namespace="project-onboarding-operator",
-              deployment="project-onboarding-operator-controller-manager"
-            } < 1
+            (
+              sum(up{
+                namespace="project-onboarding-operator",
+                service=~".*controller-manager-metrics-service"
+              } == 1) < 1
+            )
+            or
+            (
+              kube_deployment_status_replicas_available{
+                namespace="project-onboarding-operator",
+                deployment="project-onboarding-operator-controller-manager"
+              } < 1
+            )
           for: 5m
           labels:
             severity: critical
           annotations:
             summary: Project Onboarding operator controller is down
-            description: No available replicas for project-onboarding-operator-controller-manager in project-onboarding-operator for 5 minutes.
+            description: Metrics scrape or deployment availability indicates project-onboarding-operator-controller-manager is unavailable in project-onboarding-operator for 5 minutes.
         - alert: ProjectOnboardingReconcileErrors
           expr: |
             sum(rate(controller_runtime_reconcile_errors_total{controller="projectonboarding"}[5m])) > 0
@@ -61,3 +70,7 @@ spec:
           annotations:
             summary: Project Onboarding reconcile errors ({{ $labels.reason }})
             description: The projectonboarding controller has reported reconcile errors with reason {{ $labels.reason }} for more than 10 minutes.
+        - record: projectonboarding:reconcile_error_rate5m
+          expr: sum(rate(projectonboarding_reconcile_errors_total[5m]))
+        - record: projectonboarding:tenant_count
+          expr: sum(projectonboarding_tenants_total)

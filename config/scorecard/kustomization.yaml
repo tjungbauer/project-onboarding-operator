@@ -15,4 +15,10 @@ patches:
     kind: Configuration
     name: config
     version: v1alpha3
+- path: patches/intermediate.config.yaml
+  target:
+    group: scorecard.operatorframework.io
+    kind: Configuration
+    name: config
+    version: v1alpha3
 # +kubebuilder:scaffold:patches

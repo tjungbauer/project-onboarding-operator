@@ -10,26 +10,6 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /validate-onboarding-stderr-at-v1alpha1-projectonboarding
-  failurePolicy: Fail
-  name: vprojectonboarding.kb.io
-  rules:
-  - apiGroups:
-    - onboarding.stderr.at
-    apiVersions:
-    - v1alpha1
-    operations:
-    - CREATE
-    - UPDATE
-    resources:
-    - projectonboardings
-  sideEffects: None
-- admissionReviewVersions:
-  - v1
-  clientConfig:
-    service:
-      name: webhook-service
-      namespace: system
       path: /validate-onboarding-stderr-at-v1beta1-projectonboarding
   failurePolicy: Fail
   name: vprojectonboardingv1beta1.kb.io
@@ -43,27 +23,6 @@ webhooks:
     - UPDATE
     resources:
     - projectonboardings
-  sideEffects: None
-- admissionReviewVersions:
-  - v1
-  clientConfig:
-    service:
-      name: webhook-service
-      namespace: system
-      path: /validate-onboarding-stderr-at-v1alpha1-tshirtsize
-  failurePolicy: Fail
-  name: vtshirtsize.kb.io
-  rules:
-  - apiGroups:
-    - onboarding.stderr.at
-    apiVersions:
-    - v1alpha1
-    operations:
-    - CREATE
-    - UPDATE
-    - DELETE
-    resources:
-    - tshirtsizes
   sideEffects: None
 - admissionReviewVersions:
   - v1

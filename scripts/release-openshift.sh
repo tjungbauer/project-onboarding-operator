@@ -23,6 +23,7 @@
 #   CATALOG_BASE_IMG  optional — previous catalog image for cumulative index (opm --from-index)
 #   CATALOG_FRESH     default: false — build catalog from scratch (no --from-index)
 #   APPLY_MARKETPLACE_CATALOG  default: false — apply CatalogSource to openshift-marketplace
+#   PIN_CSV_IMAGE_DIGEST      default: true — pin operator image to @sha256 in published bundle CSV
 #
 # Note: CLI <VERSION> wins over a exported VERSION env var.
 #       IMG/BUNDLE_IMG/REGISTRY from the shell are ignored (recomputed each run).
@@ -194,10 +195,39 @@ else
   echo "==> Skipping operator image build (SKIP_BUILD=true)"
 fi
 
+resolve_image_digest() {
+  local ref="$1"
+  if command -v skopeo >/dev/null 2>&1; then
+    skopeo inspect --override-arch amd64 --override-os linux "docker://${ref}" --format '{{.Digest}}'
+    return 0
+  fi
+  local repo_digest
+  repo_digest="$("${CONTAINER_TOOL}" inspect --format='{{index .RepoDigests 0}}' "${ref}" 2>/dev/null || true)"
+  if [[ -n "${repo_digest}" && "${repo_digest}" == *@sha256:* ]]; then
+    echo "${repo_digest#*@}"
+    return 0
+  fi
+  echo "error: could not resolve digest for ${ref} (install skopeo or use docker with RepoDigests)" >&2
+  return 1
+}
+
 echo "==> Generating OLM bundle"
 PREV_VERSION="$(semver_prev_patch "${VERSION}" 2>/dev/null || true)"
 make bundle IMG="${IMG}" VERSION="${VERSION}" CHANNELS="${CHANNELS}" DEFAULT_CHANNEL="${DEFAULT_CHANNEL}" \
   ${PREV_VERSION:+PREV_VERSION="${PREV_VERSION}"}
+
+if [[ "${PIN_CSV_IMAGE_DIGEST:-true}" == "true" ]]; then
+  OPERATOR_DIGEST="$(resolve_image_digest "${IMG}")"
+  echo "==> Pinning CSV operator image to digest ${OPERATOR_DIGEST}"
+  python3 scripts/pin-csv-operator-image-digest.py --image "${IMG}" --digest "${OPERATOR_DIGEST}"
+  python3 scripts/patch-csv-spec-descriptors.py
+  python3 scripts/pin-bundle-created-at.py
+  chmod +x scripts/normalize-bundle-monitoring.sh
+  scripts/normalize-bundle-monitoring.sh
+  if command -v operator-sdk >/dev/null 2>&1; then
+    operator-sdk bundle validate ./bundle
+  fi
+fi
 
 echo "==> Building bundle image"
 make bundle-build BUNDLE_IMG="${BUNDLE_IMG}" CONTAINER_TOOL="${CONTAINER_TOOL}"

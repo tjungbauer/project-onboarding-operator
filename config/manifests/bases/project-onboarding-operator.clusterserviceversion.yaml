@@ -19,24 +19,12 @@ spec:
       kind: ProjectOnboarding
       name: projectonboardings.onboarding.stderr.at
       version: v1beta1
-    - description: ProjectOnboarding is a cluster-scoped schema for project onboarding
-        API.
-      displayName: Project Onboarding
-      kind: ProjectOnboarding
-      name: projectonboardings.onboarding.stderr.at
-      version: v1alpha1
     - description: TShirtSize is a cluster-scoped catalogue entry to pre-define project
         sizes (S, M, L, ...).
       displayName: TShirt Size
       kind: TShirtSize
       name: tshirtsizes.onboarding.stderr.at
       version: v1beta1
-    - description: TShirtSize is a cluster-scoped catalogue entry to pre-define project
-        sizes (S, M, L, ...).
-      displayName: TShirt Size
-      kind: TShirtSize
-      name: tshirtsizes.onboarding.stderr.at
-      version: v1alpha1
   description: |
     Operator for OpenShift project/tenant onboarding. Reconciles tenant Namespaces, ResourceQuotas,
     LimitRanges, NetworkPolicies, OpenShift Groups, RoleBindings, and EgressIPs from a

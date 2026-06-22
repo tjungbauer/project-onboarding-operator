@@ -63,13 +63,13 @@ Cross-object checks use **validating admission webhooks**:
 
 Webhooks use OpenShift service serving certificates (`config/openshift/webhook_cabundle_patch.yaml`, `config/openshift/webhook_service_tls_patch.yaml`).
 
-## API version (`v1alpha1` / `v1beta1`)
-
+## API version (`v1beta1`)
 
 | Version   | Role |
 | --------- | ---- |
-| `v1beta1` | Storage version (preferred for new manifests) |
-| `v1alpha1` | Served; converted via conversion webhook (`/convert` on the operator webhook service) |
+| `v1beta1` | Sole served and storage version |
+
+`v1alpha1` was removed in **0.0.50**. Migrate manifests to `onboarding.stderr.at/v1beta1` before upgrading.
 
 ## API stability policy
 
@@ -77,10 +77,9 @@ Webhooks use OpenShift service serving certificates (`config/openshift/webhook_c
 |-------|--------------------------|
 | **OLM maturity `stable`** | Operator packaging and reconcile behaviour are production-supported; upgrades are documented in [upgrade.md](upgrade.md). |
 | **API group `onboarding.stderr.at`** | Domain is stable; breaking group renames require a new API group and migration. |
-| **`v1beta1`** | Preferred storage version. Field additions are backward-compatible. Breaking field removals or semantic changes require a deprecation period (≥ one minor release) and `CHANGELOG.md` notice. |
-| **`v1alpha1`** | Legacy served version. New features land in `v1beta1` first. `v1alpha1` may be removed after deprecation when no clients remain. |
+| **`v1beta1`** | Storage and served version. Field additions are backward-compatible. Breaking field removals or semantic changes require a deprecation period (≥ one minor release) and `CHANGELOG.md` notice. |
 
-Before promoting to `v1` (if ever): publish a migration guide, run conversion tests, and bump CSV/API docs.
+Before promoting to `v1` (if ever): publish a migration guide and bump CSV/API docs.
 
 ## GitOps / Argo CD AppProject
 

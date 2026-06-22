@@ -29,10 +29,10 @@ flowchart TB
 
 | Component | Location | Role |
 |-----------|----------|------|
-| **API** | `api/v1beta1` (storage), `api/v1alpha1` (served) | CRD schemas, conversion |
+| **API** | `api/v1beta1` | CRD schemas |
 | **Controllers** | `internal/controller/` | Watch CRs, enqueue reconcile |
 | **Reconcile engine** | `internal/onboarding/` | Create/patch/prune namespaces, quotas, policies, RBAC, GitOps, OpenShift types |
-| **Webhooks** | `internal/webhook/`, `internal/validation/` | Validate CRs, conversion hub |
+| **Webhooks** | `internal/webhook/`, `internal/validation/` | Validate CRs at admission |
 | **Manager** | `cmd/main.go` | Leader election, metrics :8443, webhook server |
 | **OLM bundle** | `bundle/` | CSV, CRDs, RBAC, ServiceMonitor, PrometheusRule |
 
@@ -79,8 +79,8 @@ Metrics use controller-runtime TLS on port **8443**. The default OLM bundle sets
 ## Supply chain
 
 - Multi-stage build: Red Hat Hardened Images (`build/hi-images.lock`, `hack/resolve-hi-digests.sh`).
-- Release images signed with cosign; SPDX SBOM attached ([supply-chain.md](supply-chain.md)).
-- Published OLM bundle uses semver image tags (digest pinning in CSV deferred — see [supply-chain.md](supply-chain.md)).
+- Release images signed with cosign; SPDX SBOM and SLSA provenance attached ([supply-chain.md](supply-chain.md)).
+- Git bundle uses semver image tags; **published** bundle images pin the operator deployment to `@sha256` digests at release time.
 
 ## Related docs
 

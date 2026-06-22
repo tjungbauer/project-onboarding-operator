@@ -43,6 +43,15 @@ jobs:
           chmod +x hack/resolve-hi-digests.sh
           hack/resolve-hi-digests.sh --check
 
+      - name: Lint
+        run: make lint
+
+      - name: Go vulnerability scan
+        run: |
+          go install golang.org/x/vuln/cmd/govulncheck@v1.4.0
+          make build
+          govulncheck -mode=binary ./bin/manager
+
       - name: Unit tests
         run: make test
 
@@ -180,8 +189,18 @@ jobs:
           COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
           COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
         run: |
-          chmod +x scripts/sign-release-images.sh
+          chmod +x scripts/sign-release-images.sh scripts/attest-slsa-provenance.sh
           ./scripts/sign-release-images.sh "${VERSION}"
+          ./scripts/attest-slsa-provenance.sh "${VERSION}"
+
+      - name: Verify cosign signatures
+        env:
+          VERSION: ${{ steps.version.outputs.value }}
+          COSIGN_EXPERIMENTAL: "true"
+        run: |
+          chmod +x scripts/verify-release-images.sh scripts/verify-slsa-provenance.sh
+          ./scripts/verify-release-images.sh "${VERSION}"
+          ./scripts/verify-slsa-provenance.sh "${VERSION}"
 
       - name: Publish SBOMs on GitHub Release
         uses: softprops/action-gh-release@v3

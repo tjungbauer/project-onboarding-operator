@@ -1,0 +1,47 @@
+# Example Alertmanager routing for operator alerts (User Workload Monitoring or self-managed).
+# Customize receivers (PagerDuty, Slack, email) for your environment.
+apiVersion: monitoring.coreos.com/v1alpha1
+kind: AlertmanagerConfig
+metadata:
+  labels:
+    control-plane: controller-manager
+    app.kubernetes.io/name: project-onboarding-operator
+    app.kubernetes.io/managed-by: kustomize
+  name: controller-manager-alerts
+  namespace: system
+spec:
+  route:
+    receiver: project-onboarding-operator-default
+    groupBy:
+      - alertname
+      - namespace
+    routes:
+      - matchers:
+          - name: alertname
+            value: ProjectOnboardingOperatorDown
+        receiver: project-onboarding-operator-critical
+        continue: false
+      - matchers:
+          - name: alertname
+            matchType: =~
+            value: ProjectOnboarding.*
+        receiver: project-onboarding-operator-warnings
+      - matchers:
+          - name: alertname
+            value: TShirtSizeReconcileErrors
+        receiver: project-onboarding-operator-warnings
+  receivers:
+    - name: project-onboarding-operator-default
+    - name: project-onboarding-operator-critical
+      # Example: uncomment and set your on-call integration
+      # pagerdutyConfigs:
+      #   - routingKey:
+      #       key: pagerduty-routing-key
+      #       name: alertmanager-pagerduty
+    - name: project-onboarding-operator-warnings
+      # Example:
+      # slackConfigs:
+      #   - apiURL:
+      #       key: webhook-url
+      #       name: alertmanager-slack
+      #     channel: '#platform-alerts'

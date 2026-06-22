@@ -95,7 +95,7 @@ Bundled `PrometheusRule` alerts are evaluated by Prometheus; **Alertmanager** ro
    - `severity=critical` → on-call (e.g. `ProjectOnboardingOperatorDown`)
    - `severity=warning` → team Slack channel (reconcile errors, workqueue backlog)
 
-OpenShift copies cluster monitoring Alertmanager config from secrets/config in `openshift-monitoring`. For user-workload monitoring, use the UWM Alertmanager instance and label selectors that include rules in your operator namespace.
+Bundled `AlertmanagerConfig` example: `config/prometheus/alertmanagerconfig.yaml` (included in `make deploy`; for OLM installs, apply manually when the `AlertmanagerConfig` CRD is available).
 
 ### Self-managed Prometheus Operator
 

@@ -521,14 +521,14 @@ def patch_csv(path: Path) -> None:
         lambda m: m.group(1) + PROJECT_ONBOARDING_RESOURCES + DESCRIPTOR_BLOCK + m.group(2),
         text,
     )
-    if count != 2:
-        sys.exit(f"expected 2 ProjectOnboarding owned entries, patched {count}")
+    if count != 1:
+        sys.exit(f"expected 1 ProjectOnboarding owned entry, patched {count}")
     updated, tshirt_count = TSHIRT_OWNED_HEAD.subn(
         lambda m: m.group(1) + TSHIRT_SIZE_RESOURCES + TSHIRT_SIZE_DESCRIPTORS + m.group(2),
         updated,
     )
-    if tshirt_count != 2:
-        sys.exit(f"expected 2 TShirtSize owned entries, patched {tshirt_count}")
+    if tshirt_count != 1:
+        sys.exit(f"expected 1 TShirtSize owned entry, patched {tshirt_count}")
     updated = strip_projectonboarding_quota_limit_examples(updated)
     path.write_text(updated)
 

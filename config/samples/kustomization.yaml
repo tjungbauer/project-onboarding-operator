@@ -1,6 +1,6 @@
 ## Append samples of your project ##
 # ProjectOnboarding and TShirtSize are cluster-scoped; spec.namespaces[].name is the tenant namespace.
-# v1alpha1 manifests for conversion testing live under conversion/ (not bundled in OLM alm-examples).
+# v1beta1 manifests for OLM alm-examples (config/samples).
 
 resources:
 - onboarding_v1beta1_tshirtsizes_catalog.yaml

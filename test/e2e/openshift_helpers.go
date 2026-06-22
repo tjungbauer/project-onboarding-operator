@@ -154,9 +154,7 @@ func dumpOperatorLogsOnFailure() {
 
 // OLM registers kubebuilder webhooks with generated suffixes (e.g. vprojectonboarding.kb.io-4knj6).
 var operatorValidatingWebhookPrefixes = []string{
-	"vprojectonboarding.kb.io",
 	"vprojectonboardingv1beta1.kb.io",
-	"vtshirtsize.kb.io",
 	"vtshirtsizev1beta1.kb.io",
 }
 

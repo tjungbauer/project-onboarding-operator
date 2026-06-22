@@ -4,6 +4,29 @@ All notable changes to this project are documented here. Version numbers match O
 
 ## [Unreleased]
 
+## [0.0.50] - 2026-06-22
+
+### Added
+
+- Post-release cosign verify (`scripts/verify-release-images.sh`) and SLSA provenance attestations (`scripts/attest-slsa-provenance.sh`) plus verification (`scripts/verify-slsa-provenance.sh`).
+- OLM CSV operator image digest pinning at publish time (`scripts/pin-csv-operator-image-digest.py`).
+- Automated cluster rollback (`scripts/rollback-cluster.sh`).
+- Per-package coverage thresholds (45% total on `internal/…`, package floors).
+- Bundled `AlertmanagerConfig`, SLO/recording rules, intermediate scorecard tests.
+- OpenShift TC-15 (OLM upgrade path), bundle upgrade unit test, fuzz and load tests.
+- Helm chart (`charts/project-onboarding-operator/`) for OLM CatalogSource + Subscription.
+- Docs: [disaster-recovery.md](docs/disaster-recovery.md), [slo.md](docs/slo.md), [capacity-performance.md](docs/capacity-performance.md).
+
+### Changed
+
+- **Breaking:** Removed `v1alpha1` API and conversion webhook; use `v1beta1` only.
+- Release workflow runs `make lint` and `govulncheck` in validate job.
+- `ProjectOnboardingOperatorDown` uses metrics `up` with kube-state-metrics fallback.
+
+### Removed
+
+- `api/v1alpha1`, conversion webhook, TC-12 conversion test manifests.
+
 ## [0.0.49] - 2026-06-22
 
 ### Added

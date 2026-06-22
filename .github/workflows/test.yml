@@ -20,9 +20,6 @@ jobs:
       - name: OpenShift reconcile unit tests
         run: go test ./internal/onboarding/ -run 'OpenShift|EgressIP|Group' -count=1
 
-      - name: API conversion tests
-        run: go test ./api/v1alpha1/ -run 'Convert' -count=1
-
       - name: Running Tests
         run: |
           go mod tidy

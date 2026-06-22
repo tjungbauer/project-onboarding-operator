@@ -17,6 +17,7 @@ limitations under the License.
 package e2e
 
 import (
+	"os"
 	"strings"
 	"time"
 
@@ -32,21 +33,18 @@ const (
 	manifestTC03 = "tc03-tshirt-onboarding.yaml"
 	manifestTC04 = "tc04-openshift-features.yaml"
 	manifestTC05 = "tc05-custom-netpol.yaml"
-	manifestTC12 = "tc12-api-conversion-v1alpha1.yaml"
 	manifestTC13 = "tc13-gitops-onboarding.yaml"
 
 	crTC01 = "tc01-core-onboarding"
 	crTC03 = "tc03-tshirt-onboarding"
 	crTC04 = "tc04-openshift-features"
 	crTC05 = "tc05-custom-netpol"
-	crTC12 = "tc12-conversion-test"
 	crTC13 = "tc13-gitops-onboarding"
 
 	nsTC01 = "ocp-test-core-dev"
 	nsTC03 = "ocp-test-medium-dev"
 	nsTC04 = "ocp-test-egress-dev"
 	nsTC05 = "ocp-test-netpol-dev"
-	nsTC12 = "ocp-test-conversion-dev"
 	nsTC13 = "ocp-test-gitops-dev"
 
 	ttsTC02 = "ocp-test-medium"
@@ -93,19 +91,13 @@ var _ = Describe("OpenShift test cases", Ordered, func() {
 			g.Expect(out).To(Equal("Running"))
 		}).Should(Succeed())
 
-		By("checking CRD storage version is v1beta1")
+		By("checking CRD serves v1beta1 only")
 		out, err = kubectlOutput("get", "crd", "projectonboardings.onboarding.stderr.at",
-			"-o", "jsonpath={.spec.versions[?(@.storage==true)].name}")
+			"-o", "jsonpath={.spec.versions[*].name}")
 		Expect(err).NotTo(HaveOccurred())
 		Expect(out).To(Equal("v1beta1"))
 
-		By("checking conversion webhook strategy")
-		out, err = kubectlOutput("get", "crd", "projectonboardings.onboarding.stderr.at",
-			"-o", "jsonpath={.spec.conversion.strategy}")
-		Expect(err).NotTo(HaveOccurred())
-		Expect(out).To(Equal("Webhook"))
-
-		By("checking validating webhooks for v1alpha1 and v1beta1")
+		By("checking validating webhooks for v1beta1")
 		expectOperatorValidatingWebhooks()
 
 		By("checking operator NetworkPolicies")
@@ -277,24 +269,26 @@ spec:
 		}, 2*time.Minute, 5*time.Second).Should(Succeed())
 	})
 
-	It("TC-12 should convert v1alpha1 apply to v1beta1 storage", func() {
-		kubectlApplyFile(openshiftManifest(manifestTC12))
-		waitProjectOnboardingReady(crTC12)
+	It("TC-12 should accept v1beta1 ProjectOnboarding API", func() {
+		kubectlApplyFile(openshiftManifest(manifestTC01))
+		waitProjectOnboardingReady(crTC01)
 
-		out, err := kubectlOutput("get", "projectonboarding", crTC12, "-o", "jsonpath={.apiVersion}")
+		out, err := kubectlOutput("get", "projectonboarding", crTC01, "-o", "jsonpath={.apiVersion}")
 		Expect(err).NotTo(HaveOccurred())
 		Expect(out).To(Equal("onboarding.stderr.at/v1beta1"))
+	})
 
-		raw, err := kubectlOutput("get", "--raw",
-			"/apis/onboarding.stderr.at/v1alpha1/projectonboardings/"+crTC12)
+	It("TC-15 should expose OLM upgrade path via CSV replaces", func() {
+		ns := operatorNamespace()
+		csvJSONPath := `{range .items[?(@.spec.displayName=='Project Onboarding')]}` +
+			`{.metadata.name}{" "}{.spec.version}{" "}{.spec.replaces}{"\n"}{end}`
+		out, err := kubectlOutput("get", "csv", "-n", ns, "-o", "jsonpath="+csvJSONPath)
 		Expect(err).NotTo(HaveOccurred())
-		Expect(raw).To(MatchRegexp(`"apiVersion"\s*:\s*"onboarding.stderr.at/v1alpha1"`))
-
-		_, err = kubectlOutput("get", "namespace", nsTC12)
-		Expect(err).NotTo(HaveOccurred())
-
-		_, err = kubectlOutput("get", "resourcequota", nsTC12+"-quota", "-n", nsTC12)
-		Expect(err).NotTo(HaveOccurred())
+		Expect(strings.TrimSpace(out)).NotTo(BeEmpty())
+		Expect(out).To(MatchRegexp(`project-onboarding-operator\.v[0-9]+\.[0-9]+\.[0-9]+`))
+		if prev := strings.TrimSpace(os.Getenv("OPENSHIFT_E2E_PREV_VERSION")); prev != "" {
+			Expect(out).To(ContainSubstring("project-onboarding-operator.v" + prev))
+		}
 	})
 
 	It("TC-13 should reconcile GitOps AppProject when Argo CD CRD is present", func() {

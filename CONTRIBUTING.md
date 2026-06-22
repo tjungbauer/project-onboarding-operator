@@ -57,10 +57,10 @@ Optional GitHub secrets:
 
 | Path | Purpose |
 |------|---------|
-| `api/` | CRD types (`v1beta1` storage, `v1alpha1` conversion) |
+| `api/` | CRD types (`v1beta1`) |
 | `internal/onboarding/` | Reconcile logic |
 | `internal/controller/` | Controller-runtime reconcilers |
-| `internal/webhook/` | Admission and conversion webhooks |
+| `internal/webhook/` | Admission webhooks |
 | `config/` | Kustomize manifests, samples, OLM bundle inputs |
 | `test/e2e/` | Kind and OpenShift E2E tests |
 

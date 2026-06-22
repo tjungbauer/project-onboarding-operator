@@ -1,6 +1,6 @@
 # OpenShift test manifests
 
-YAML files for manual and automated OpenShift E2E (TC-00–TC-14). See [docs/openshift-testcases.md](../../docs/openshift-testcases.md).
+YAML files for manual and automated OpenShift E2E (TC-00–TC-15). See [docs/openshift-testcases.md](../../docs/openshift-testcases.md).
 
 | TC | Manifest / procedure |
 |----|----------------------|
@@ -15,8 +15,9 @@ YAML files for manual and automated OpenShift E2E (TC-00–TC-14). See [docs/ope
 | TC-09 | Procedural: delete `tc01-core-onboarding` CR (see testcases doc) |
 | TC-10 | Procedural: patch quota in namespace from TC-03 |
 | TC-11 | Procedural: patch `TShirtSize` from TC-02 |
-| TC-12 | `tc12-api-conversion-v1alpha1.yaml` |
+| TC-12 | `tc01-core-onboarding.yaml` (v1beta1 API check; same as TC-01) |
 | TC-13 | `tc13-gitops-onboarding.yaml` |
 | TC-14 | Procedural: verify ServiceMonitor + PrometheusRule in operator namespace |
+| TC-15 | Procedural: verify CSV `spec.replaces` (see testcases doc) |
 
 Cleanup: [`../cleanup.sh`](../cleanup.sh)

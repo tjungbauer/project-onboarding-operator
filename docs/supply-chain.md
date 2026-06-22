@@ -79,14 +79,22 @@ SKIP_SIGN=true ./scripts/sign-release-images.sh "${VERSION}"   # SBOM only
 SKIP_SBOM=true ./scripts/sign-release-images.sh "${VERSION}"   # sign only
 ```
 
-## SLSA provenance (current scope)
+## SLSA provenance
 
-| Artifact | Today | Not yet |
-| -------- | ----- | ------- |
-| Release images | **cosign** signatures (keyless OIDC in CI) | SLSA build attestations |
-| SBOM | **SPDX** attached via cosign + GitHub Release assets | — |
+| Artifact | Status |
+| -------- | ------ |
+| cosign image signatures | Published on every release (keyless OIDC in CI) |
+| SPDX SBOM | Attached via cosign + GitHub Release assets |
+| **SLSA provenance** | Attached via `cosign attest --type slsaprovenance` (`scripts/attest-slsa-provenance.sh`) |
 
-We do **not** publish [SLSA](https://slsa.dev/) build provenance attestations yet. Consumers can verify image signatures and SPDX SBOMs as documented above. Build attestations are planned for a future release.
+Verify signatures and provenance after release:
+
+```bash
+./scripts/verify-release-images.sh 0.0.50
+./scripts/verify-slsa-provenance.sh 0.0.50
+```
+
+Post-release, the Release workflow runs both verifications automatically.
 
 ## Container vulnerability scanning (Trivy)
 
@@ -115,10 +123,14 @@ You do **not** edit digests by hand for routine operator upgrades — only when 
 
 ## OLM operator image digests
 
-- **Git / PR CI:** the committed bundle uses semver **tags** (`quay.io/...:vX.Y.Z`) so `make bundle` drift checks work without registry access.
-- **Published bundle image:** uses the same tag-based CSV as git (digest pinning in OLM CSV is planned once `patch-csv-spec-descriptors.py` supports post-digest regeneration).
+| Context | CSV operator `image:` |
+| ------- | --------------------- |
+| **Git / PR CI** | Semver tag (`quay.io/...:vX.Y.Z`) — `make bundle` drift checks work without registry access |
+| **Published bundle** | Immutable digest (`quay.io/...@sha256:…`) plus `spec.relatedImages` and `containerImage` annotation |
 
-To upgrade clusters, use the version tag as today (`./scripts/upgrade-cluster.sh X.Y.Z`); you do not edit digests by hand for routine upgrades.
+`scripts/release-openshift.sh` resolves the operator image digest after push and runs `scripts/pin-csv-operator-image-digest.py` before `bundle-build`. Set `PIN_CSV_IMAGE_DIGEST=false` to skip (local testing only).
+
+Cluster upgrades still use version tags (`./scripts/upgrade-cluster.sh X.Y.Z`); you do not edit digests by hand for routine upgrades.
 
 ## Optional GitHub secrets
 

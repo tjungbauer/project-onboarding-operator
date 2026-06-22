@@ -112,9 +112,9 @@ vet: ## Run go vet against code.
 
 .PHONY: test
 test: manifests generate fmt vet setup-envtest ## Run tests.
-	KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) --bin-dir $(LOCALBIN) -p path)" go test $$(go list ./... | grep -v /e2e) -coverprofile cover.out
+	KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) --bin-dir $(LOCALBIN) -p path)" go test $$(go list ./... | grep -v /e2e) -coverpkg=./internal/... -coverprofile cover.out
 	@chmod +x scripts/check-coverage.sh
-	@MIN_COVERAGE=$(or $(MIN_COVERAGE),25) scripts/check-coverage.sh cover.out
+	@MIN_COVERAGE=$(or $(MIN_COVERAGE),45) scripts/check-coverage.sh cover.out
 
 # E2E tests use Kind (see tests/e2e). Override with a custom cluster by changing tests/e2e setup.
 # CertManager is installed by default; skip with CERT_MANAGER_INSTALL_SKIP=true.

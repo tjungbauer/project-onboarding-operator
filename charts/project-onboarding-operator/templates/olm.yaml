@@ -1,0 +1,28 @@
+{{- if .Values.catalog.image }}
+apiVersion: operators.coreos.com/v1alpha1
+kind: CatalogSource
+metadata:
+  name: {{ .Values.catalog.name }}
+  namespace: {{ .Values.marketplaceNamespace }}
+spec:
+  displayName: {{ .Values.catalog.displayName }}
+  publisher: {{ .Values.catalog.publisher }}
+  sourceType: grpc
+  image: {{ .Values.catalog.image }}
+  updateStrategy:
+    registryPoll:
+      interval: 45m
+---
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: {{ .Values.subscription.name }}
+  namespace: {{ .Values.operatorNamespace }}
+spec:
+  channel: {{ .Values.subscription.channel }}
+  name: project-onboarding-operator
+  source: {{ .Values.catalog.name }}
+  sourceNamespace: {{ .Values.marketplaceNamespace }}
+  startingCSV: {{ .Values.subscription.startingCSV }}
+  installPlanApproval: {{ .Values.subscription.installPlanApproval }}
+{{- end }}

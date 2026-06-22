@@ -205,7 +205,7 @@ oc get pods -n "${OPERATOR_NS}" -l control-plane=controller-manager
 
 ### Kind / cert-manager (development)
 
-**Symptoms:** Webhook TLS errors after deploy; CRD conversion fails.
+**Symptoms:** Webhook TLS errors after deploy; admission rejects valid CRs.
 
 **Fix:**
 
@@ -291,6 +291,7 @@ Security-sensitive findings: [SECURITY.md](../SECURITY.md) (email **dev@stdin.at
 | Topic | Document |
 | ----- | -------- |
 | User lifecycle (offboard/delete) | [guide.md — Lifecycle](guide.md#lifecycle-enable-freeze-offboard-and-delete) |
-| Metrics and alerts | [metrics.md](metrics.md) |
+| Metrics and alerts | [metrics.md](metrics.md), [slo.md](slo.md) |
+| Disaster recovery / rollback | [disaster-recovery.md](disaster-recovery.md), `scripts/rollback-cluster.sh` |
 | OperatorHub upgrade detail | [operatorhub-install.md](operatorhub-install.md) |
 | Manual test cases | [openshift-testcases.md](openshift-testcases.md) |

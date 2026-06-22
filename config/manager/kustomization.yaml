@@ -6,4 +6,4 @@ kind: Kustomization
 images:
 - name: controller
   newName: quay.io/tjungbau/project-onboarding-operator
-  newTag: v0.0.49
+  newTag: v0.0.50

@@ -4,7 +4,7 @@ Manual test cases to verify **project-onboarding-operator** on OpenShift 4.x aft
 
 **Quick path:** apply manifests under `[test/openshift/manifests/](../test/openshift/manifests/)` and run `[test/openshift/cleanup.sh](../test/openshift/cleanup.sh)`. The detailed steps below expand each case for formal QA sign-off.
 
-Manifests use `v1beta1` by default (TC-12 uses `v1alpha1` for conversion testing).
+Manifests use `onboarding.stderr.at/v1beta1` only (`v1alpha1` removed in 0.0.50).
 
 ## Prerequisites
 
@@ -50,7 +50,7 @@ Some reconciliation paths require OpenShift APIs that **Kind / plain Kubernetes 
 | ----------------- | ----------------------------------------------------------------------------------------------- |
 | **Unit tests**    | `internal/onboarding/openshift_test.go` — Group + EgressIP reconcile/cleanup with a fake client |
 | **Kind E2E**      | Pod health, metrics, core onboarding (namespace + quota)                                        |
-| **OpenShift E2E** | TC-00–TC-14 via `make test-e2e-openshift` (TC-13/14 auto-skip when CRDs missing)                |
+| **OpenShift E2E** | TC-00–TC-15 via `make test-e2e-openshift` (TC-13/14 auto-skip when CRDs missing) |
 
 
 ---
@@ -60,7 +60,7 @@ Some reconciliation paths require OpenShift APIs that **Kind / plain Kubernetes 
 
 | ID    | Area                             | Required?              | Pass criteria                                                  |
 | ----- | -------------------------------- | ---------------------- | -------------------------------------------------------------- |
-| TC-00 | Operator health                  | Yes                    | CSV, pod, CRDs, webhooks, conversion, operator NetworkPolicies |
+| TC-00 | Operator health                  | Yes                    | CSV, pod, CRDs, webhooks, operator NetworkPolicies             |
 | TC-01 | Core onboarding                  | Yes                    | Namespace + quota + limit range + network policies             |
 | TC-02 | T-shirt catalogue                | Yes                    | `TShirtSize` Ready, reference count                            |
 | TC-03 | T-shirt merge                    | Yes                    | Quota CPU overridden, memory from T-shirt                      |
@@ -72,9 +72,10 @@ Some reconciliation paths require OpenShift APIs that **Kind / plain Kubernetes 
 | TC-09 | CR delete / cleanup              | Yes                    | Tenant namespace removed after offboard + CR delete            |
 | TC-10 | Drift correction                 | Yes                    | Operator restores edited quota                                 |
 | TC-11 | T-shirt update propagation       | Yes                    | Quota changes when `TShirtSize` is patched                     |
-| TC-12 | API conversion                   | Yes                    | Apply `v1alpha1`, stored/read as `v1beta1`                     |
+| TC-12 | v1beta1 API                      | Yes                    | `ProjectOnboarding` stored and served as `v1beta1`             |
 | TC-13 | GitOps AppProject                | If Argo CD CRD present | AppProject + managed-by label                                  |
 | TC-14 | Observability                    | Optional               | ServiceMonitor + PrometheusRule present                        |
+| TC-15 | OLM upgrade path                 | Yes                    | CSV `spec.replaces` points at previous bundle version          |
 
 
 ---
@@ -90,7 +91,7 @@ oc api-resources | grep -E 'projectonboarding|tshirtsize'
 oc get validatingwebhookconfiguration -o name | grep -E 'vprojectonboarding|vtshirtsize'
 ```
 
-**Verify API versions and conversion**
+**Verify API versions**
 
 ```bash
 # Storage version is v1beta1
@@ -102,13 +103,9 @@ oc get crd tshirtsizes.onboarding.stderr.at \
   -o jsonpath='{.spec.versions[?(@.storage==true)].name}{"\n"}'
 # Expected: v1beta1
 
-# Conversion webhook on CRDs
-oc get crd projectonboardings.onboarding.stderr.at -o jsonpath='{.spec.conversion.strategy}{"\n"}'
-# Expected: Webhook
-
-# Both v1alpha1 and v1beta1 validating webhooks (OLM names: vprojectonboarding.kb.io-*, etc.)
+# v1beta1 validating webhooks (OLM names: vprojectonboarding.kb.io-*, etc.)
 oc get validatingwebhookconfiguration -o name | grep -E 'vprojectonboarding|vtshirtsize' | sort
-# Expected: v1alpha1 + v1beta1 webhooks for ProjectOnboarding and TShirtSize
+# Expected: v1beta1 webhooks for ProjectOnboarding and TShirtSize
 ```
 
 **Verify operator hardening (0.0.10+ bundle)**
@@ -128,9 +125,8 @@ oc get servicemonitor,prometheusrule -n "${OPERATOR_NS}" 2>/dev/null || true
 
 - CSV `phase: Succeeded`
 - Controller Deployment available, pod `Running`
-- CRDs: `projectonboardings.onboarding.stderr.at`, `tshirtsizes.onboarding.stderr.at` (both versions served)
-- Validating webhooks for `ProjectOnboarding` and `TShirtSize` (`v1alpha1` + `v1beta1`)
-- CRD conversion strategy `Webhook` pointing at operator webhook service `/convert`
+- CRDs: `projectonboardings.onboarding.stderr.at`, `tshirtsizes.onboarding.stderr.at` (`v1beta1` only)
+- Validating webhooks for `ProjectOnboarding` and `TShirtSize` (`v1beta1`)
 
 **Optional — controller logs**
 
@@ -419,40 +415,49 @@ oc get resourcequota ocp-test-medium-dev-quota -n ocp-test-medium-dev \
 
 ---
 
-## TC-12 — API conversion (`v1alpha1` → `v1beta1`)
+## TC-12 — v1beta1 API
 
-**Manifest:** `test/openshift/manifests/tc12-api-conversion-v1alpha1.yaml` (intentionally `v1alpha1`)  
-**Tenant namespace:** `ocp-test-conversion-dev`
+**Manifest:** `test/openshift/manifests/tc01-core-onboarding.yaml`  
+**Tenant namespace:** `ocp-test-core-dev`
 
 **Steps**
 
 ```bash
-oc apply -f test/openshift/manifests/tc12-api-conversion-v1alpha1.yaml
-oc wait --for=jsonpath='{.status.phase}'=Ready projectonboarding/tc12-conversion-test --timeout=3m
+oc apply -f test/openshift/manifests/tc01-core-onboarding.yaml
+oc wait --for=jsonpath='{.status.phase}'=Ready projectonboarding/tc01-core-onboarding --timeout=3m
 ```
 
-**Verify stored and served versions**
+**Verify**
 
 ```bash
-# Default get returns storage version
-oc get pob tc12-conversion-test -o jsonpath='{.apiVersion}{"\n"}'
+oc get pob tc01-core-onboarding -o jsonpath='{.apiVersion}{"\n"}'
 # Expected: onboarding.stderr.at/v1beta1
 
-# Explicit v1alpha1 read still works (conversion spoke)
-oc get pob tc12-conversion-test --raw '/apis/onboarding.stderr.at/v1alpha1/projectonboardings/tc12-conversion-test' \
-  | grep '"apiVersion"'
-# Expected: onboarding.stderr.at/v1alpha1
-
-# Reconciliation succeeded on converted object
-oc get namespace ocp-test-conversion-dev
-oc get resourcequota ocp-test-conversion-dev-quota -n ocp-test-conversion-dev
+oc get namespace ocp-test-core-dev
+oc get resourcequota ocp-test-core-dev-quota -n ocp-test-core-dev
 ```
 
-**Cleanup**
+**Cleanup:** covered by TC-09 or `./test/openshift/cleanup.sh`
+
+---
+
+## TC-15 — OLM upgrade path
+
+**Procedure only** (no manifest). Verifies the installed CSV declares an OLM upgrade edge via `spec.replaces`.
+
+**Steps**
 
 ```bash
-oc delete -f test/openshift/manifests/tc12-api-conversion-v1alpha1.yaml
+oc get csv -n "${OPERATOR_NS}" \
+  -o jsonpath='{range .items[?(@.spec.displayName=="Project Onboarding")]}{.metadata.name}{" replaces="}{.spec.replaces}{"\n"}{end}'
 ```
+
+**Expected**
+
+- CSV name matches `project-onboarding-operator.vX.Y.Z`
+- `spec.replaces` is set to the previous bundle version when upgrading from an earlier release (empty on first install)
+
+Automated: `make test-e2e-openshift` (set `OPENSHIFT_E2E_PREV_VERSION` to assert a specific `replaces` target).
 
 ---
 
@@ -605,8 +610,9 @@ oc logs -n "${OPERATOR_NS}" -l control-plane=controller-manager -c manager --tai
 
 1. TC-00 (health)
 2. TC-01 → TC-09 (core smoke + delete)
-3. TC-12 (API conversion)
-4. TC-02 → TC-03 → TC-08 → TC-10 → TC-11 (T-shirt path)
+3. TC-12 (v1beta1 API)
+4. TC-15 (OLM upgrade path)
+5. TC-02 → TC-03 → TC-08 → TC-10 → TC-11 (T-shirt path)
 5. TC-04 (OpenShift APIs)
 6. TC-05 (custom netpol)
 7. TC-13 (GitOps — skip if no AppProject CRD)

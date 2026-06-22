@@ -8,24 +8,16 @@ import (
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 
-	onboardingv1alpha1 "github.com/tjungbauer/project-onboarding-operator/api/v1alpha1"
 	onboardingv1beta1 "github.com/tjungbauer/project-onboarding-operator/api/v1beta1"
 )
 
 func TestSchemeRegistersDistinctGVKs(t *testing.T) {
 	s := runtime.NewScheme()
 	utilruntime.Must(clientgoscheme.AddToScheme(s))
-	utilruntime.Must(onboardingv1alpha1.AddToScheme(s))
 	utilruntime.Must(onboardingv1beta1.AddToScheme(s))
 
-	assertGVK(t, s, &onboardingv1alpha1.ProjectOnboarding{}, schema.GroupVersionKind{
-		Group: "onboarding.stderr.at", Version: "v1alpha1", Kind: "ProjectOnboarding",
-	})
 	assertGVK(t, s, &onboardingv1beta1.ProjectOnboarding{}, schema.GroupVersionKind{
 		Group: "onboarding.stderr.at", Version: "v1beta1", Kind: "ProjectOnboarding",
-	})
-	assertGVK(t, s, &onboardingv1alpha1.TShirtSize{}, schema.GroupVersionKind{
-		Group: "onboarding.stderr.at", Version: "v1alpha1", Kind: "TShirtSize",
 	})
 	assertGVK(t, s, &onboardingv1beta1.TShirtSize{}, schema.GroupVersionKind{
 		Group: "onboarding.stderr.at", Version: "v1beta1", Kind: "TShirtSize",

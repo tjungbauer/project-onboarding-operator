@@ -65,6 +65,26 @@ stages:
     storage:
       spec:
         mountPath: {}
+  - entrypoint:
+    - scorecard-test
+    - spec-crd-validated
+    image: quay.io/operator-framework/scorecard-test:v1.42.2
+    labels:
+      suite: intermediate
+      test: spec-crd-validated-test
+    storage:
+      spec:
+        mountPath: {}
+  - entrypoint:
+    - scorecard-test
+    - spec-has-workload
+    image: quay.io/operator-framework/scorecard-test:v1.42.2
+    labels:
+      suite: intermediate
+      test: spec-has-workload-test
+    storage:
+      spec:
+        mountPath: {}
 storage:
   spec:
     mountPath: {}
