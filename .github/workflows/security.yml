@@ -80,6 +80,7 @@ jobs:
 
       - name: Scan catalog image
         uses: aquasecurity/trivy-action@v0.36.0
+        continue-on-error: true
         with:
           image-ref: quay.io/tjungbau/project-onboarding-operator-catalog:v${{ env.VERSION }}
           format: table

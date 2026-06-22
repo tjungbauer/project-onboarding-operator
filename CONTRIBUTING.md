@@ -22,7 +22,7 @@ Install paths: [docs/install.md](docs/install.md).
 Optional GitHub secrets:
 
 - `COSIGN_PRIVATE_KEY` + `COSIGN_PASSWORD` for static signing instead of keyless OIDC
-- `OPENSHIFT_KUBECONFIG` (base64 kubeconfig) — required for OpenShift E2E on `main` and weekly schedule
+- `OPENSHIFT_KUBECONFIG` (base64 kubeconfig) — optional; enables OpenShift E2E (TC-00–TC-14). Without it, that workflow skips cleanly.
 
 ## Branch protection (recommended)
 
@@ -37,7 +37,7 @@ On GitHub **Settings → Branches → main**, enable required status checks befo
 | Operator SDK scorecard | `bundle.yml` |
 | Go vulnerability scan | `security.yml` |
 | Container image vulnerability scan | `security.yml` |
-| OpenShift test cases (TC-00–TC-14) | `test-e2e-openshift.yml` (when secret configured) |
+| OpenShift test cases (TC-00–TC-14) | `test-e2e-openshift.yml` (optional; skips when secret not set) |
 
 Require branches to be up to date before merging.
 

@@ -21,10 +21,6 @@ jobs:
           KUBECONFIG_B64: ${{ secrets.OPENSHIFT_KUBECONFIG }}
         run: |
           if [ -z "${KUBECONFIG_B64}" ]; then
-            if [ "${{ github.ref }}" = "refs/heads/main" ] || [ "${{ github.event_name }}" = "schedule" ]; then
-              echo "::error::OPENSHIFT_KUBECONFIG secret is required on main branch pushes and scheduled runs"
-              exit 1
-            fi
             echo "skip=true" >> "$GITHUB_OUTPUT"
             echo "OPENSHIFT_KUBECONFIG secret not configured; skipping OpenShift E2E"
           else

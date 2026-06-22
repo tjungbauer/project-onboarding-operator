@@ -4,6 +4,12 @@ All notable changes to this project are documented here. Version numbers match O
 
 ## [Unreleased]
 
+### Fixed
+
+- CI: OpenShift E2E skips when `OPENSHIFT_KUBECONFIG` is unset (no longer fails `main` pushes).
+- CI: catalog Trivy scan is non-blocking (opm base image CVEs); operator and bundle scans remain required.
+- CI: `catalog-build` uses `--pull-tool none` so PR validation uses locally built bundle images.
+
 ## [0.0.48] - 2026-06-22
 
 ### Added
