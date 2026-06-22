@@ -390,8 +390,13 @@ endif
 # Building on Mac ARM without this causes "exec /bin/opm: Exec format error" on the cluster.
 PLATFORM ?= linux/amd64
 
-# opm --pull-tool: use local bundle images in CI (do not require Quay pull).
-OPM_PULL_TOOL ?= none
+# opm tool flags: when adding to an existing index (--from-index), pull from registry.
+# For fresh/local bundle images (CI), use --pull-tool none + --build-tool (not --container-tool).
+ifneq ($(strip $(FROM_INDEX_OPT)),)
+OPM_TOOL_ARGS := --container-tool $(CONTAINER_TOOL)
+else
+OPM_TOOL_ARGS := --pull-tool none --build-tool $(CONTAINER_TOOL)
+endif
 
 # Build a catalog image by adding bundle images to an empty catalog using the operator package manager tool, 'opm'.
 # This recipe invokes 'opm' in 'semver' bundle add mode. For more information on add modes, see:
@@ -399,7 +404,7 @@ OPM_PULL_TOOL ?= none
 .PHONY: catalog-build
 catalog-build: opm ## Build a catalog image.
 	rm -rf database catalog.index.Dockerfile
-	$(OPM) index add --pull-tool $(OPM_PULL_TOOL) --container-tool $(CONTAINER_TOOL) --mode semver --bundles $(BUNDLE_IMGS) $(FROM_INDEX_OPT) --generate -d catalog.index.Dockerfile
+	$(OPM) index add $(OPM_TOOL_ARGS) --mode semver --bundles $(BUNDLE_IMGS) $(FROM_INDEX_OPT) --generate -d catalog.index.Dockerfile
 	$(CONTAINER_TOOL) build --platform $(PLATFORM) -f catalog.index.Dockerfile -t $(CATALOG_IMG) .
 	rm -rf database catalog.index.Dockerfile
 

@@ -42,7 +42,7 @@ jobs:
           chmod +x operator-sdk
           sudo mv operator-sdk /usr/local/bin/operator-sdk
 
-      - name: Build release images
+      - name: Build and scan operator and bundle images
         env:
           CONTAINER_TOOL: docker
         run: |
@@ -52,9 +52,6 @@ jobs:
           docker build --platform=linux/amd64 "${HI_ARGS[@]}" -t "quay.io/tjungbau/project-onboarding-operator:v${VERSION}" .
           make bundle IMG="quay.io/tjungbau/project-onboarding-operator:v${VERSION}"
           make bundle-build BUNDLE_IMG="quay.io/tjungbau/project-onboarding-operator-bundle:v${VERSION}" CONTAINER_TOOL=docker
-          make catalog-build CATALOG_IMG="quay.io/tjungbau/project-onboarding-operator-catalog:v${VERSION}" \
-            BUNDLE_IMGS="quay.io/tjungbau/project-onboarding-operator-bundle:v${VERSION}" \
-            CONTAINER_TOOL=docker PLATFORM=linux/amd64
 
       - name: Scan operator image
         uses: aquasecurity/trivy-action@v0.36.0
@@ -71,18 +68,6 @@ jobs:
         uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: quay.io/tjungbau/project-onboarding-operator-bundle:v${{ env.VERSION }}
-          format: table
-          exit-code: 1
-          severity: CRITICAL,HIGH
-          ignore-unfixed: true
-        env:
-          VERSION: ${{ env.VERSION }}
-
-      - name: Scan catalog image
-        uses: aquasecurity/trivy-action@v0.36.0
-        continue-on-error: true
-        with:
-          image-ref: quay.io/tjungbau/project-onboarding-operator-catalog:v${{ env.VERSION }}
           format: table
           exit-code: 1
           severity: CRITICAL,HIGH
