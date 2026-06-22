@@ -34,6 +34,12 @@ fi
 identity="${COSIGN_CERTIFICATE_IDENTITY_REGEXP:-https://github.com/tjungbauer/project-onboarding-operator/.github/workflows/release.yml@refs/tags/v.*}"
 issuer="${COSIGN_CERTIFICATE_OIDC_ISSUER:-https://token.actions.githubusercontent.com}"
 
+use_public_sigstore_tuf() {
+  export TUF_MIRROR="${SIGSTORE_PUBLIC_TUF_MIRROR:-https://tuf-repo-cdn.sigstore.dev}"
+  export TUF_ROOT="${SIGSTORE_PUBLIC_TUF_ROOT:-${ROOT}/.cache/sigstore-public-tuf}"
+  mkdir -p "${TUF_ROOT}"
+}
+
 verify_args=(
   --type slsaprovenance
   --certificate-identity-regexp "${identity}"
@@ -45,6 +51,7 @@ if [[ -n "${COSIGN_PRIVATE_KEY:-}" ]]; then
 elif [[ -f "${COSIGN_KEY:-cosign.pub}" ]]; then
   verify_args=(--key "${COSIGN_KEY:-cosign.pub}" --type slsaprovenance)
 else
+  use_public_sigstore_tuf
   export COSIGN_EXPERIMENTAL="${COSIGN_EXPERIMENTAL:-1}"
 fi
 

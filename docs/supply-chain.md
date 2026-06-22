@@ -96,6 +96,32 @@ Verify signatures and provenance after release:
 
 Post-release, the Release workflow runs both verifications automatically.
 
+### Troubleshooting: TUF / `503` from a private Sigstore mirror
+
+If `cosign verify` fails with a URL like `tuf-trusted-artifact-signer.apps.<cluster>/2.root.json` and HTTP **503**, your workstation likely ran `cosign initialize --mirror …` for **OpenShift Trusted Artifact Signer**. Release images from this repo are signed with **public Sigstore** (GitHub Actions OIDC), so verification must use `tuf-repo-cdn.sigstore.dev`, not the cluster mirror.
+
+**Preferred:** use the repo scripts — they pin public TUF for keyless verification:
+
+```bash
+./scripts/verify-release-images.sh 0.0.51
+./scripts/verify-slsa-provenance.sh 0.0.51
+```
+
+**Manual one-off verify** (same public TUF the scripts use):
+
+```bash
+export TUF_MIRROR=https://tuf-repo-cdn.sigstore.dev
+export TUF_ROOT="${PWD}/.cache/sigstore-public-tuf"
+mkdir -p "${TUF_ROOT}"
+export COSIGN_EXPERIMENTAL=1
+
+cosign verify "${IMG}" \
+  --certificate-identity-regexp='https://github.com/tjungbauer/project-onboarding-operator/.github/workflows/release.yml@refs/tags/v.*' \
+  --certificate-oidc-issuer='https://token.actions.githubusercontent.com'
+```
+
+To restore public Sigstore as your **default** cosign TUF mirror for all commands: `cosign initialize` (no `--mirror`).
+
 ## Container vulnerability scanning (Trivy)
 
 | Image | PR security workflow | Release workflow |

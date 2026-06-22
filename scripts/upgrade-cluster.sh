@@ -70,6 +70,26 @@ echo "    BUNDLE_IMG=${BUNDLE_IMG}"
 echo "    CATALOG_IMG=${CATALOG_IMG}"
 echo "    (no build/push — images must already exist on Quay)"
 
+TARGET_CSV="project-onboarding-operator.v${VERSION}"
+if oc get "csv/${TARGET_CSV}" -n "${OPERATOR_NS}" >/dev/null 2>&1; then
+  csv_phase="$(oc get "csv/${TARGET_CSV}" -n "${OPERATOR_NS}" -o jsonpath='{.status.phase}')"
+  if [[ "${csv_phase}" == "Succeeded" ]]; then
+    echo "==> Already installed: ${TARGET_CSV} (phase=${csv_phase})"
+    echo "    Skipping catalog/bundle upgrade (re-running bundle-upgrade would duplicate the FBC entry)."
+    echo "==> Waiting for deployment rollout"
+    oc rollout status "deployment/project-onboarding-operator-controller-manager" \
+      -n "${OPERATOR_NS}" --timeout=5m
+    echo "==> Current CSV and image"
+    oc get csv -n "${OPERATOR_NS}" | grep project-onboarding || true
+    oc get deploy -n "${OPERATOR_NS}" \
+      -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.spec.template.spec.containers[0].image}{"\n"}{end}'
+    echo
+    echo "==> Done"
+    exit 0
+  fi
+  echo "==> Found ${TARGET_CSV} (phase=${csv_phase}); continuing upgrade path"
+fi
+
 if ! oc get subscription "${SUB_NAME}" -n "${OPERATOR_NS}" >/dev/null 2>&1; then
   found_sub="$(oc get subscription -n "${OPERATOR_NS}" -o jsonpath='{range .items[?(@.spec.name=="project-onboarding-operator")]}{.metadata.name}{"\n"}{end}' 2>/dev/null | head -1)"
   if [[ -n "${found_sub}" ]]; then

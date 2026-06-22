@@ -10,6 +10,8 @@
 #   COSIGN_CERTIFICATE_IDENTITY_REGEXP
 #   COSIGN_CERTIFICATE_OIDC_ISSUER
 #   SKIP_SBOM_CHECK        default: false
+#   SIGSTORE_PUBLIC_TUF_MIRROR  override public Sigstore TUF mirror (keyless verify only)
+#   SIGSTORE_PUBLIC_TUF_ROOT    override local TUF cache dir (keyless verify only)
 
 set -euo pipefail
 
@@ -42,12 +44,21 @@ fi
 identity="${COSIGN_CERTIFICATE_IDENTITY_REGEXP:-https://github.com/tjungbauer/project-onboarding-operator/.github/workflows/release.yml@refs/tags/v.*}"
 issuer="${COSIGN_CERTIFICATE_OIDC_ISSUER:-https://token.actions.githubusercontent.com}"
 
+use_public_sigstore_tuf() {
+  # Releases are signed with GitHub OIDC against public Sigstore, not a private
+  # OpenShift Trusted Artifact Signer mirror that may be configured in ~/.sigstore.
+  export TUF_MIRROR="${SIGSTORE_PUBLIC_TUF_MIRROR:-https://tuf-repo-cdn.sigstore.dev}"
+  export TUF_ROOT="${SIGSTORE_PUBLIC_TUF_ROOT:-${ROOT}/.cache/sigstore-public-tuf}"
+  mkdir -p "${TUF_ROOT}"
+}
+
 verify_args=()
 if [[ -n "${COSIGN_PRIVATE_KEY:-}" ]]; then
   verify_args=(--key "env://COSIGN_PRIVATE_KEY")
 elif [[ -f "${COSIGN_KEY:-cosign.pub}" ]]; then
   verify_args=(--key "${COSIGN_KEY:-cosign.pub}")
 else
+  use_public_sigstore_tuf
   export COSIGN_EXPERIMENTAL="${COSIGN_EXPERIMENTAL:-1}"
   verify_args=(
     --certificate-identity-regexp "${identity}"

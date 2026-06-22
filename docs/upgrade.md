@@ -105,7 +105,17 @@ UPGRADE=true ./scripts/release-openshift.sh 0.0.51
 
 ## Stuck upgrades
 
-See [operatorhub-install.md — Stuck or failed upgrade](operatorhub-install.md#stuck-or-failed-upgrade) and [runbook.md — Failed upgrades](runbook.md#failed-upgrades).
+**`duplicate entry "project-onboarding-operator.vX.Y.Z"`** when using Path A (`operator-sdk run bundle-upgrade`): the target CSV is already in the in-namespace FBC catalog — usually because the upgrade **already succeeded** and you re-ran the command. Check:
+
+```bash
+oc get csv -n project-onboarding-operator | grep project-onboarding
+```
+
+If the target version shows **Succeeded**, no further upgrade is needed. `./scripts/upgrade-cluster.sh` skips automatically when the CSV is already Succeeded.
+
+To upgrade to a **new** version, use the next release tag (for example `0.0.52`), not the version already installed.
+
+See also [operatorhub-install.md — Stuck or failed upgrade](operatorhub-install.md#stuck-or-failed-upgrade) and [runbook.md — Failed upgrades](runbook.md#failed-upgrades).
 
 Common fix when CSV stays on an old version: delete the old CSV, patch subscription `startingCSV`, watch InstallPlans:
 
