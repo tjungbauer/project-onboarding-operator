@@ -14,7 +14,7 @@ All notable changes to this project are documented here. Version numbers match O
 - `build/hi-images.lock` and `hack/resolve-hi-digests.sh` — pin Red Hat Hardened Image linux/amd64 digests for CI/release.
 - `scripts/hi-build-args.sh` — pass pinned HI digests to container builds.
 - `scripts/check-coverage.sh` — enforce minimum unit test coverage (25%) in `make test`.
-- Scorecard integration stage: `olm-crds-deployed`, `olm-bundle-deployment`.
+- Scorecard runs against PR-built operator image in Kind; deployment behaviour covered by Kind E2E.
 - Critical Prometheus alert `ProjectOnboardingOperatorDown`.
 - API stability policy in [docs/api-design.md](docs/api-design.md).
 

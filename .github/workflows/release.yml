@@ -59,9 +59,6 @@ jobs:
           kind load docker-image curlimages/curl:8.12.1 --name project-onboarding-operator-test-e2e
           kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.16.3/cert-manager.yaml
           kubectl wait --for=condition=Available -n cert-manager deployment --all --timeout=300s
-          if ! kubectl get crd subscriptions.operators.coreos.com >/dev/null 2>&1; then
-            operator-sdk olm install --timeout 5m
-          fi
 
       - name: Kind E2E tests
         env:

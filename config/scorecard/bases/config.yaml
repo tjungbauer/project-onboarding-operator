@@ -5,5 +5,3 @@ metadata:
 stages:
 - parallel: true
   tests: []
-- parallel: false
-  tests: []

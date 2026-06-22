@@ -65,27 +65,6 @@ stages:
     storage:
       spec:
         mountPath: {}
-- tests:
-  - entrypoint:
-    - scorecard-test
-    - olm-crds-deployed
-    image: quay.io/operator-framework/scorecard-test:v1.42.2
-    labels:
-      suite: olm
-      test: olm-crds-deployed-test
-    storage:
-      spec:
-        mountPath: {}
-  - entrypoint:
-    - scorecard-test
-    - olm-bundle-deployment
-    image: quay.io/operator-framework/scorecard-test:v1.42.2
-    labels:
-      suite: olm
-      test: olm-bundle-deployment-test
-    storage:
-      spec:
-        mountPath: {}
 storage:
   spec:
     mountPath: {}
