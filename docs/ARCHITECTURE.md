@@ -80,7 +80,7 @@ Metrics use controller-runtime TLS on port **8443**. The default OLM bundle sets
 
 - Multi-stage build: Red Hat Hardened Images (`build/hi-images.lock`, `hack/resolve-hi-digests.sh`).
 - Release images signed with cosign; SPDX SBOM attached ([supply-chain.md](supply-chain.md)).
-- Published OLM bundle resolves operator image **by digest** at release time (`USE_IMAGE_DIGESTS=true` in `release-openshift.sh`).
+- Published OLM bundle uses semver image tags (digest pinning in CSV deferred — see [supply-chain.md](supply-chain.md)).
 
 ## Related docs
 

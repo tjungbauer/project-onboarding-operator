@@ -95,7 +95,7 @@ You do **not** edit digests by hand for routine operator upgrades — only when 
 ## OLM operator image digests
 
 - **Git / PR CI:** the committed bundle uses semver **tags** (`quay.io/...:vX.Y.Z`) so `make bundle` drift checks work without registry access.
-- **Published bundle image:** `release-openshift.sh` runs `make bundle USE_IMAGE_DIGESTS=true` **after** the operator image is pushed, so the CSV on Quay references the immutable digest for that tag.
+- **Published bundle image:** uses the same tag-based CSV as git (digest pinning in OLM CSV is planned once `patch-csv-spec-descriptors.py` supports post-digest regeneration).
 
 To upgrade clusters, use the version tag as today (`./scripts/upgrade-cluster.sh X.Y.Z`); you do not edit digests by hand for routine upgrades.
 

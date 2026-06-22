@@ -196,9 +196,7 @@ fi
 
 echo "==> Generating OLM bundle"
 PREV_VERSION="$(semver_prev_patch "${VERSION}" 2>/dev/null || true)"
-# Resolve operator image tag to digest in the published bundle (git-committed bundle keeps tags for dev/CI drift).
 make bundle IMG="${IMG}" VERSION="${VERSION}" CHANNELS="${CHANNELS}" DEFAULT_CHANNEL="${DEFAULT_CHANNEL}" \
-  USE_IMAGE_DIGESTS=true \
   ${PREV_VERSION:+PREV_VERSION="${PREV_VERSION}"}
 
 echo "==> Building bundle image"
