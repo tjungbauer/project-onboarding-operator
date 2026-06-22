@@ -21,7 +21,7 @@ Install paths: [docs/install.md](docs/install.md).
    git add build/hi-images.lock
    ```
 2. Ensure `[Unreleased]` in `CHANGELOG.md` is complete; move entries into `[X.Y.Z] - YYYY-MM-DD` and clear `[Unreleased]`.
-3. Bump `VERSION`, run `make bundle`, commit `bundle/` changes.
+3. Bump `VERSION`, run `make bundle`, commit `bundle/` changes. Bump `charts/project-onboarding-operator/Chart.yaml` `version` and `appVersion` to match. If **signed commits** are required on `main`, use `git commit -S` (see [Commits](#commits)).
 4. Run `./scripts/pre-release-check.sh` locally (or use **Actions → Release → Run workflow** dry-run).
 5. Tag `vX.Y.Z` and push — the release workflow validates, publishes to Quay, **signs images (cosign)**, attaches **SPDX SBOMs**, and creates the GitHub Release. See [docs/supply-chain.md](docs/supply-chain.md).
 
@@ -47,15 +47,18 @@ Configure on **Settings → Branches → main** (each job `name:` below is a dis
 
 Also enable:
 
-- **Require branches to be up to date** before merging (`strict` status checks).
-- **Do not allow bypassing the above settings** (`enforce_admins`).
+- **Require branches to be up to date** before merging (`strict` status checks) when using pull requests.
 
-**Not enabled by default** (enable separately under branch rules if you want them):
+**Direct push to `main`:** keep **Do not allow bypassing** (`enforce_admins`) **disabled** so maintainers can push without waiting for every check on every commit. Required checks still gate pull request merges.
 
-- **Require signed commits** — off unless you turn on “Require signed commits” in branch protection.
-- **Require linear history** — off unless you enable “Require linear history” (squash/rebase-only merges).
+After renaming workflow jobs, update required checks in GitHub **after** the new job names have run once on `main` (otherwise pushes are blocked waiting for checks that do not exist yet).
 
-GitHub only shows checks that have run at least once on the default branch; after renaming jobs, update required checks to match the new names above (remove stale **Run on Ubuntu**).
+**Optional** (off by default on this repo):
+
+| Setting | Effect |
+|---------|--------|
+| **Require signed commits** | Every commit on `main` must be signed — use `git commit -S` (see below). |
+| **Require linear history** | No merge commits; squash or rebase only. |
 
 Optional GitHub secrets:
 
@@ -76,3 +79,36 @@ Optional GitHub secrets:
 ## Commits
 
 Use imperative, concise subject lines (e.g. `Add pause annotation for ProjectOnboarding`).
+
+### Signed commits (when branch protection requires them)
+
+A plain `git commit -m "..."` is **rejected** if **Require signed commits** is enabled on `main`. Sign each commit with `-S` (or enable signing by default).
+
+**One-time setup — SSH signing (recommended on macOS):**
+
+```bash
+# Upload the public key to GitHub → Settings → SSH and GPG keys → New signing key
+git config --global gpg.format ssh
+git config --global user.signingkey ~/.ssh/id_ed25519.pub   # your signing public key
+git config --global commit.gpgsign true                     # optional: sign every commit
+```
+
+**One-time setup — GPG:**
+
+```bash
+git config --global user.signingkey <YOUR_GPG_KEY_ID>
+git config --global commit.gpgsign true
+```
+
+**Release commit example:**
+
+```bash
+git add -A
+git commit -S -m "$(cat <<'EOF'
+Release v0.0.51: dedupe SCC binding, Helm appVersion defaults, doc refresh.
+EOF
+)"
+git push origin main
+```
+
+Use `-S` on every commit you push to a protected branch while the rule is on. Signed **tags** (`git tag -s v0.0.51 -m "..."`) are separate and optional unless you enforce them elsewhere.

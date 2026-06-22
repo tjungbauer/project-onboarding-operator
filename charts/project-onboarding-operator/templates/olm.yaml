@@ -1,4 +1,7 @@
-{{- if .Values.catalog.image }}
+{{- $version := .Chart.AppVersion }}
+{{- $catalogImage := .Values.catalog.image | default (printf "quay.io/tjungbau/project-onboarding-operator-catalog:v%s" $version) }}
+{{- $startingCSV := .Values.subscription.startingCSV | default (printf "project-onboarding-operator.v%s" $version) }}
+{{- if $catalogImage }}
 apiVersion: operators.coreos.com/v1alpha1
 kind: CatalogSource
 metadata:
@@ -8,7 +11,7 @@ spec:
   displayName: {{ .Values.catalog.displayName }}
   publisher: {{ .Values.catalog.publisher }}
   sourceType: grpc
-  image: {{ .Values.catalog.image }}
+  image: {{ $catalogImage }}
   updateStrategy:
     registryPoll:
       interval: 45m
@@ -23,6 +26,6 @@ spec:
   name: project-onboarding-operator
   source: {{ .Values.catalog.name }}
   sourceNamespace: {{ .Values.marketplaceNamespace }}
-  startingCSV: {{ .Values.subscription.startingCSV }}
+  startingCSV: {{ $startingCSV }}
   installPlanApproval: {{ .Values.subscription.installPlanApproval }}
 {{- end }}

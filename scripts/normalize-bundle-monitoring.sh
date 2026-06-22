@@ -22,3 +22,5 @@ promote "controller-manager-metrics-monitor_monitoring.coreos.com_v1_servicemoni
   "controller-manager-metrics-monitor" "project-onboarding-operator-controller-manager-metrics-monitor"
 promote "controller-manager-rules_monitoring.coreos.com_v1_prometheusrule.yaml" \
   "controller-manager-rules" "project-onboarding-operator-controller-manager-rules"
+promote "controller-manager-nonroot-v2_rbac.authorization.k8s.io_v1_clusterrolebinding.yaml" \
+  "controller-manager-nonroot-v2" "project-onboarding-operator-controller-manager-nonroot-v2"

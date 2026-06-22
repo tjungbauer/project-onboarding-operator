@@ -119,6 +119,12 @@ jobs:
       - name: Lint Helm chart
         run: helm lint charts/project-onboarding-operator
 
+      - name: Check Helm chart appVersion matches VERSION
+        run: |
+          chart_app="$(grep '^appVersion:' charts/project-onboarding-operator/Chart.yaml | awk '{print $2}' | tr -d '"')"
+          repo_ver="$(tr -d ' \n\r' < VERSION)"
+          test "${chart_app}" = "${repo_ver}"
+
       - name: Render Helm chart
         run: |
           helm template project-onboarding-operator charts/project-onboarding-operator \

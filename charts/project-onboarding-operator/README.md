@@ -9,16 +9,25 @@ Alternative to `oc apply` on `config/openshift/catalogsource-marketplace.yaml` a
 
 ## Install
 
+`catalog.image` and `subscription.startingCSV` default from `Chart.yaml` `appVersion` (keep in sync with repo `VERSION` on release):
+
+```bash
+helm install project-onboarding-operator ./charts/project-onboarding-operator \
+  --namespace project-onboarding-operator --create-namespace
+```
+
+Override for a specific tag:
+
 ```bash
 helm install project-onboarding-operator ./charts/project-onboarding-operator \
   --namespace project-onboarding-operator --create-namespace \
-  --set catalog.image=quay.io/tjungbau/project-onboarding-operator-catalog:v0.0.50 \
-  --set subscription.startingCSV=project-onboarding-operator.v0.0.50
+  --set catalog.image=quay.io/tjungbau/project-onboarding-operator-catalog:v0.0.51 \
+  --set subscription.startingCSV=project-onboarding-operator.v0.0.51
 ```
 
 ## Upgrade
 
-Bump `catalog.image` and `subscription.startingCSV` to the target release, then:
+Re-install or upgrade the chart after bumping `Chart.yaml` `appVersion` to the target release, or override `catalog.image` / `subscription.startingCSV`:
 
 ```bash
 helm upgrade project-onboarding-operator ./charts/project-onboarding-operator ...

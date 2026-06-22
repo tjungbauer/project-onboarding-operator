@@ -4,15 +4,16 @@ All notable changes to this project are documented here. Version numbers match O
 
 ## [Unreleased]
 
-### Added
+## [0.0.51] - 2026-06-22
 
-- Helm chart CI (`helm lint` / `helm template`) in `bundle.yml`.
-- Distinct GitHub Actions job names (`Unit tests`, `Lint`, `Kind E2E tests`) for branch protection.
+### Fixed
+
+- Remove duplicate SCC `ClusterRoleBinding` from OLM bundle (`normalize-bundle-monitoring.sh` promotes a single prefixed binding).
+- Helm chart catalog/subscription versions default from `Chart.yaml` `appVersion` (sync with repo `VERSION` on release).
 
 ### Changed
 
-- Branch protection guidance in `CONTRIBUTING.md` (removed `docs/branch-protection.md` reference).
-- Docs: `AlertmanagerConfig` is manual apply only (not in OLM bundle); simplified `v1beta1`-only API wording.
+- Docs: refresh `upgrade.md`, `runbook.md`, and `supply-chain.md` examples to current release versions.
 
 ## [0.0.50] - 2026-06-22
 

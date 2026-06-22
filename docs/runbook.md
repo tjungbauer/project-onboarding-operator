@@ -112,7 +112,7 @@ oc get pob -A -o yaml | grep -B5 <tenant-ns>
 3. Delete the **stuck old CSV** (replace version):
 
    ```bash
-   oc delete csv project-onboarding-operator.v0.0.45 -n "${OPERATOR_NS}"
+   oc delete csv project-onboarding-operator.v0.0.50 -n "${OPERATOR_NS}"
    ```
 
 4. Watch for new InstallPlan and `Succeeded` CSV:

@@ -23,7 +23,7 @@ No repository secrets are required for keyless signing. Optional: set `COSIGN_PR
 Install cosign, then for a released tag:
 
 ```bash
-export VERSION=0.0.46
+export VERSION=0.0.51
 export IMG=quay.io/tjungbau/project-onboarding-operator:v${VERSION}
 
 # Keyless (GitHub Actions OIDC) — adjust identity regex to match your repo/workflow
@@ -90,8 +90,8 @@ SKIP_SBOM=true ./scripts/sign-release-images.sh "${VERSION}"   # sign only
 Verify signatures and provenance after release:
 
 ```bash
-./scripts/verify-release-images.sh 0.0.50
-./scripts/verify-slsa-provenance.sh 0.0.50
+./scripts/verify-release-images.sh 0.0.51
+./scripts/verify-slsa-provenance.sh 0.0.51
 ```
 
 Post-release, the Release workflow runs both verifications automatically.

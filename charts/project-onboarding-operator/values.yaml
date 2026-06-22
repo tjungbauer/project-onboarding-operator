@@ -1,20 +1,24 @@
 # Default values for project-onboarding-operator OLM install.
 # This chart creates a CatalogSource + Subscription (OperatorHub path).
 # For operator-sdk run bundle installs, use scripts/upgrade-cluster.sh instead.
+#
+# Image tag and startingCSV default from Chart.yaml appVersion (kept in sync with repo VERSION on release).
 
 operatorNamespace: project-onboarding-operator
 marketplaceNamespace: openshift-marketplace
 
 catalog:
   name: project-onboarding-operator-catalog
-  image: quay.io/tjungbau/project-onboarding-operator-catalog:v0.0.50
+  # Leave empty to use quay.io/tjungbau/project-onboarding-operator-catalog:v<appVersion>
+  image: ""
   displayName: Project Onboarding Operator
   publisher: tjungbauer
 
 subscription:
   name: project-onboarding-operator
   channel: stable
-  startingCSV: project-onboarding-operator.v0.0.50
+  # Leave empty to use project-onboarding-operator.v<appVersion>
+  startingCSV: ""
   installPlanApproval: Automatic
 
 installMode: AllNamespaces

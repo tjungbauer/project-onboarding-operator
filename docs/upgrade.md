@@ -31,7 +31,7 @@ Typical after [openshift-install.md](openshift-install.md) (`operator-sdk run bu
 **One command** (replace version):
 
 ```bash
-operator-sdk run bundle-upgrade quay.io/tjungbau/project-onboarding-operator-bundle:v0.0.47 \
+operator-sdk run bundle-upgrade quay.io/tjungbau/project-onboarding-operator-bundle:v0.0.51 \
   --namespace project-onboarding-operator \
   --timeout 10m
 ```
@@ -39,7 +39,7 @@ operator-sdk run bundle-upgrade quay.io/tjungbau/project-onboarding-operator-bun
 Or from the repository root:
 
 ```bash
-./scripts/upgrade-cluster.sh 0.0.47
+./scripts/upgrade-cluster.sh 0.0.51
 ```
 
 The script detects the in-namespace catalog and runs `operator-sdk run bundle-upgrade`.
@@ -48,7 +48,7 @@ The script detects the in-namespace catalog and runs `operator-sdk run bundle-up
 
 ```bash
 oc wait --for=jsonpath='{.status.phase}'=Succeeded \
-  csv/project-onboarding-operator.v0.0.47 \
+  csv/project-onboarding-operator.v0.0.51 \
   -n project-onboarding-operator --timeout=10m
 
 oc rollout status deployment/project-onboarding-operator-controller-manager \
@@ -66,7 +66,7 @@ Typical after [operatorhub-install.md](operatorhub-install.md).
 2. Point the CatalogSource at the new catalog tag and restart the catalog pod:
 
 ```bash
-export VERSION=0.0.47
+export VERSION=0.0.51
 
 oc patch catalogsource project-onboarding-operator-catalog -n openshift-marketplace \
   --type merge -p "{\"spec\":{\"image\":\"quay.io/tjungbau/project-onboarding-operator-catalog:v${VERSION}\"}}"
@@ -97,8 +97,8 @@ Or use the helper script (detects marketplace catalog):
 To publish images **and** upgrade a cluster in one go:
 
 ```bash
-./scripts/release-openshift.sh 0.0.47
-UPGRADE=true ./scripts/release-openshift.sh 0.0.47
+./scripts/release-openshift.sh 0.0.51
+UPGRADE=true ./scripts/release-openshift.sh 0.0.51
 ```
 
 `UPGRADE=true` always runs the full **build, bundle, catalog push** pipeline first. That is not the same as cluster-only upgrade.
@@ -110,10 +110,10 @@ See [operatorhub-install.md — Stuck or failed upgrade](operatorhub-install.md#
 Common fix when CSV stays on an old version: delete the old CSV, patch subscription `startingCSV`, watch InstallPlans:
 
 ```bash
-export VERSION=0.0.47
+export VERSION=0.0.51
 export OPERATOR_NS=project-onboarding-operator
 
-oc delete csv project-onboarding-operator.v0.0.45 -n "${OPERATOR_NS}"   # adjust old version
+oc delete csv project-onboarding-operator.v0.0.50 -n "${OPERATOR_NS}"   # adjust old version
 oc patch subscription project-onboarding-operator -n "${OPERATOR_NS}" --type merge \
   -p "{\"spec\":{\"startingCSV\":\"project-onboarding-operator.v${VERSION}\",\"installPlanApproval\":\"Automatic\"}}"
 
