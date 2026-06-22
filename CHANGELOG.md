@@ -12,7 +12,7 @@ All notable changes to this project are documented here. Version numbers match O
 - OLM CSV operator image digest pinning at publish time (`scripts/pin-csv-operator-image-digest.py`).
 - Automated cluster rollback (`scripts/rollback-cluster.sh`).
 - Per-package coverage thresholds (45% total on `internal/…`, package floors).
-- Bundled `AlertmanagerConfig`, SLO/recording rules, intermediate scorecard tests.
+- Bundled `AlertmanagerConfig`, SLO/recording rules.
 - OpenShift TC-15 (OLM upgrade path), bundle upgrade unit test, fuzz and load tests.
 - Helm chart (`charts/project-onboarding-operator/`) for OLM CatalogSource + Subscription.
 - Docs: [disaster-recovery.md](docs/disaster-recovery.md), [slo.md](docs/slo.md), [capacity-performance.md](docs/capacity-performance.md).
