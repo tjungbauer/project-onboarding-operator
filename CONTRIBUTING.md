@@ -31,27 +31,36 @@ Install paths: [docs/install.md](docs/install.md).
 
 ## Branch protection
 
-See **[docs/branch-protection.md](docs/branch-protection.md)** for step-by-step setup of required status checks on `main`.
+Configure on **Settings → Branches → main** (each job `name:` below is a distinct required status check):
 
-Summary — enable on **Settings → Branches → main**:
-
-| Check | Workflow |
-|-------|----------|
-| Run on Ubuntu | `test.yml` |
-| Run on Ubuntu | `lint.yml` |
-| Run on Ubuntu | `test-e2e.yml` |
+| Required check | Workflow |
+|----------------|----------|
+| Unit tests | `test.yml` |
+| Lint | `lint.yml` |
+| Kind E2E tests | `test-e2e.yml` |
 | Generate and validate OLM bundle | `bundle.yml` |
 | Operator SDK scorecard | `bundle.yml` |
+| Helm chart lint and template | `bundle.yml` |
 | Go vulnerability scan | `security.yml` |
 | Container image vulnerability scan | `security.yml` |
-| OpenShift test cases (TC-00–TC-14) | `test-e2e-openshift.yml` (optional; skips when secret not set) |
+| OpenShift test cases (TC-00–TC-15) | `test-e2e-openshift.yml` (optional; skips when secret not set) |
 
-Require branches to be up to date before merging.
+Also enable:
+
+- **Require branches to be up to date** before merging (`strict` status checks).
+- **Do not allow bypassing the above settings** (`enforce_admins`).
+
+**Not enabled by default** (enable separately under branch rules if you want them):
+
+- **Require signed commits** — off unless you turn on “Require signed commits” in branch protection.
+- **Require linear history** — off unless you enable “Require linear history” (squash/rebase-only merges).
+
+GitHub only shows checks that have run at least once on the default branch; after renaming jobs, update required checks to match the new names above (remove stale **Run on Ubuntu**).
 
 Optional GitHub secrets:
 
 - `COSIGN_PRIVATE_KEY` + `COSIGN_PASSWORD` for static signing instead of keyless OIDC
-- `OPENSHIFT_KUBECONFIG` (base64 kubeconfig) — optional; enables OpenShift E2E (TC-00–TC-14). Without it, that workflow skips cleanly.
+- `OPENSHIFT_KUBECONFIG` (base64 kubeconfig) — optional; enables OpenShift E2E (TC-00–TC-15). Without it, that workflow skips cleanly.
 
 ## Code layout
 

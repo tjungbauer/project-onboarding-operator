@@ -4,6 +4,16 @@ All notable changes to this project are documented here. Version numbers match O
 
 ## [Unreleased]
 
+### Added
+
+- Helm chart CI (`helm lint` / `helm template`) in `bundle.yml`.
+- Distinct GitHub Actions job names (`Unit tests`, `Lint`, `Kind E2E tests`) for branch protection.
+
+### Changed
+
+- Branch protection guidance in `CONTRIBUTING.md` (removed `docs/branch-protection.md` reference).
+- Docs: `AlertmanagerConfig` is manual apply only (not in OLM bundle); simplified `v1beta1`-only API wording.
+
 ## [0.0.50] - 2026-06-22
 
 ### Added
@@ -12,14 +22,14 @@ All notable changes to this project are documented here. Version numbers match O
 - OLM CSV operator image digest pinning at publish time (`scripts/pin-csv-operator-image-digest.py`).
 - Automated cluster rollback (`scripts/rollback-cluster.sh`).
 - Per-package coverage thresholds (45% total on `internal/…`, package floors).
-- Bundled `AlertmanagerConfig`, SLO/recording rules.
+- SLO/recording rules in bundle `PrometheusRule`; example `AlertmanagerConfig` for manual apply (`config/prometheus/alertmanagerconfig.yaml`).
 - OpenShift TC-15 (OLM upgrade path), bundle upgrade unit test, fuzz and load tests.
 - Helm chart (`charts/project-onboarding-operator/`) for OLM CatalogSource + Subscription.
 - Docs: [disaster-recovery.md](docs/disaster-recovery.md), [slo.md](docs/slo.md), [capacity-performance.md](docs/capacity-performance.md).
 
 ### Changed
 
-- **Breaking:** Removed `v1alpha1` API and conversion webhook; use `v1beta1` only.
+- Removed unused `v1alpha1` API and conversion webhook; `v1beta1` is the only served version (no external production users on `v1alpha1`).
 - Release workflow runs `make lint` and `govulncheck` in validate job.
 - `ProjectOnboardingOperatorDown` uses metrics `up` with kube-state-metrics fallback.
 
@@ -32,7 +42,7 @@ All notable changes to this project are documented here. Version numbers match O
 ### Added
 
 - `hack/resolve-hi-digests.sh --check` and `scripts/pre-release-check.sh` — verify HI lock before release.
-- `docs/branch-protection.md` — enable required CI checks on `main`.
+- Branch protection guidance in `CONTRIBUTING.md` (required CI checks on `main`).
 - Release workflow `workflow_dispatch` dry-run (validate only; publish on tag push).
 - Grafana import steps for OpenShift monitoring; Alertmanager routing guide in [docs/metrics.md](docs/metrics.md).
 - SLSA / provenance scope documented in [docs/supply-chain.md](docs/supply-chain.md).

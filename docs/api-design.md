@@ -69,7 +69,7 @@ Webhooks use OpenShift service serving certificates (`config/openshift/webhook_c
 | --------- | ---- |
 | `v1beta1` | Sole served and storage version |
 
-`v1alpha1` was removed in **0.0.50**. Migrate manifests to `onboarding.stderr.at/v1beta1` before upgrading.
+`v1beta1` is the only API version. A short-lived `v1alpha1` scaffold was removed in **0.0.50** before any production rollout; use `onboarding.stderr.at/v1beta1` for all manifests.
 
 ## API stability policy
 

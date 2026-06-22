@@ -105,3 +105,23 @@ jobs:
       - name: Tear down Kind cluster
         if: always()
         run: make cleanup-test-e2e
+
+  helm:
+    name: Helm chart lint and template
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone the code
+        uses: actions/checkout@v4
+
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+
+      - name: Lint Helm chart
+        run: helm lint charts/project-onboarding-operator
+
+      - name: Render Helm chart
+        run: |
+          helm template project-onboarding-operator charts/project-onboarding-operator \
+            --namespace project-onboarding-operator > /tmp/helm-rendered.yaml
+          grep -q 'kind: CatalogSource' /tmp/helm-rendered.yaml
+          grep -q 'kind: Subscription' /tmp/helm-rendered.yaml

@@ -4,7 +4,7 @@ Manual test cases to verify **project-onboarding-operator** on OpenShift 4.x aft
 
 **Quick path:** apply manifests under `[test/openshift/manifests/](../test/openshift/manifests/)` and run `[test/openshift/cleanup.sh](../test/openshift/cleanup.sh)`. The detailed steps below expand each case for formal QA sign-off.
 
-Manifests use `onboarding.stderr.at/v1beta1` only (`v1alpha1` removed in 0.0.50).
+Manifests use `onboarding.stderr.at/v1beta1` only.
 
 ## Prerequisites
 

@@ -109,7 +109,7 @@ Both CRs are **cluster-scoped** (not namespaced). The CR `metadata.name` is the 
 | `TShirtSize`        | `onboarding.stderr.at` | `v1beta1`       | Same operator tile → **TShirt Size**                                                |
 
 
-`v1alpha1` was removed in **0.0.50**. Use `onboarding.stderr.at/v1beta1` for all manifests ([api-design.md](api-design.md)).
+Use `onboarding.stderr.at/v1beta1` for all manifests ([api-design.md](api-design.md)).
 
 ---
 

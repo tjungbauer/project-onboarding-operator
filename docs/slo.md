@@ -26,7 +26,7 @@ Use these in Grafana ([grafana/dashboard.json](grafana/dashboard.json)) for tren
 
 ## Alert routing
 
-Configure receivers per [metrics.md — Alert routing](metrics.md#alert-routing-alertmanager--on-call). Example `AlertmanagerConfig` ships in the bundle (`config/prometheus/alertmanagerconfig.yaml`).
+Configure receivers per [metrics.md — Alert routing](metrics.md#alert-routing-alertmanager--on-call). Example `AlertmanagerConfig` is **not** in the OLM bundle — apply `config/prometheus/alertmanagerconfig.yaml` manually when the `AlertmanagerConfig` CRD is available.
 
 ## Related
 

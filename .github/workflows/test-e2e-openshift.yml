@@ -9,7 +9,7 @@ on:
 
 jobs:
   openshift-e2e:
-    name: OpenShift test cases (TC-00–TC-14)
+    name: OpenShift test cases (TC-00–TC-15)
     runs-on: ubuntu-latest
     steps:
       - name: Clone the code
