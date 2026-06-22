@@ -4,7 +4,7 @@ Install the operator via OLM on OpenShift 4.x using `operator-sdk run bundle`. T
 
 `ProjectOnboarding` and `TShirtSize` are **cluster-scoped** CRs. `spec.namespaces[].name` is the **tenant** namespace the operator creates (for example `team-alpha-dev`).
 
-For OperatorHub (UI) install and upgrades, see [operatorhub-install.md](operatorhub-install.md).
+For OperatorHub (UI) install, see [operatorhub-install.md](operatorhub-install.md). For **upgrades** (operator-sdk vs marketplace), see [upgrade.md](upgrade.md).
 
 Prerequisites: `oc`, `podman`, `operator-sdk`, cluster-admin, Quay login.
 
@@ -135,37 +135,29 @@ The operator creates a `ResourceQuota` named `<tenant-ns>-quota` in the tenant n
 
 ## Upgrade to a new version
 
-After pushing new operator + bundle images, from the repository root:
+See **[upgrade.md](upgrade.md)** for the full guide (operator-sdk `run bundle` vs OperatorHub / marketplace catalog).
+
+**operator-sdk install** (catalog in `project-onboarding-operator`):
 
 ```bash
-export VERSION="$(tr -d ' \n\r' < VERSION)"
-export BUNDLE_IMG=quay.io/tjungbau/project-onboarding-operator-bundle:v${VERSION}
-
-# First install: operator-sdk run bundle
-# Already installed: operator-sdk run bundle-upgrade (release-openshift.sh picks this when UPGRADE=true)
-
-UPGRADE=true ./scripts/release-openshift.sh "${VERSION}"
+./scripts/upgrade-cluster.sh "$(tr -d ' \n\r' < VERSION)"
 ```
 
-Manual upgrade only (images already on Quay), from the repository root:
+**OperatorHub** (catalog in `openshift-marketplace`): patch catalog image, then subscription — details in [upgrade.md](upgrade.md#path-b-operatorhub--marketplace-catalog).
+
+**Publish images and upgrade** (maintainers):
 
 ```bash
-export VERSION="$(tr -d ' \n\r' < VERSION)"
-export BUNDLE_IMG=quay.io/tjungbau/project-onboarding-operator-bundle:v${VERSION}
-
-operator-sdk run bundle-upgrade $BUNDLE_IMG \
-  --namespace project-onboarding-operator \
-  --timeout 10m
-
-oc wait --for=jsonpath='{.status.phase}'=Succeeded \
-  csv/project-onboarding-operator.v${VERSION} \
-  -n project-onboarding-operator --timeout=10m
-
-oc rollout status deployment/project-onboarding-operator-controller-manager \
-  -n project-onboarding-operator --timeout=5m
+UPGRADE=true ./scripts/release-openshift.sh "$(tr -d ' \n\r' < VERSION)"
 ```
 
-If the subscription stays on an old CSV after a catalog update, see [operatorhub-install.md — Stuck or failed upgrade](operatorhub-install.md#stuck-or-failed-upgrade).
+**Cluster upgrade only** (images already on Quay):
+
+```bash
+./scripts/upgrade-cluster.sh "$(tr -d ' \n\r' < VERSION)"
+```
+
+If the subscription stays on an old CSV after a catalog update, see [upgrade.md](upgrade.md#stuck-upgrades) and [operatorhub-install.md — Stuck or failed upgrade](operatorhub-install.md#stuck-or-failed-upgrade).
 
 ## Uninstall
 

@@ -19,7 +19,27 @@ Install paths: [docs/install.md](docs/install.md).
 2. Bump `VERSION`, run `make bundle`, commit `bundle/` changes.
 3. Tag `vX.Y.Z` and push — the release workflow runs unit tests, Kind E2E, bundle drift check, operator-sdk scorecard, then publishes to Quay, **signs images (cosign)**, attaches **SPDX SBOMs**, and uploads SBOMs to the GitHub Release. See [docs/supply-chain.md](docs/supply-chain.md).
 
-Optional GitHub secrets: `COSIGN_PRIVATE_KEY` + `COSIGN_PASSWORD` for static signing instead of keyless OIDC.
+Optional GitHub secrets:
+
+- `COSIGN_PRIVATE_KEY` + `COSIGN_PASSWORD` for static signing instead of keyless OIDC
+- `OPENSHIFT_KUBECONFIG` (base64 kubeconfig) — required for OpenShift E2E on `main` and weekly schedule
+
+## Branch protection (recommended)
+
+On GitHub **Settings → Branches → main**, enable required status checks before merge:
+
+| Check | Workflow |
+|-------|----------|
+| Run on Ubuntu | `test.yml` |
+| Run on Ubuntu | `lint.yml` |
+| Run on Ubuntu | `test-e2e.yml` |
+| Generate and validate OLM bundle | `bundle.yml` |
+| Operator SDK scorecard | `bundle.yml` |
+| Go vulnerability scan | `security.yml` |
+| Container image vulnerability scan | `security.yml` |
+| OpenShift test cases (TC-00–TC-14) | `test-e2e-openshift.yml` (when secret configured) |
+
+Require branches to be up to date before merging.
 
 ## Code layout
 

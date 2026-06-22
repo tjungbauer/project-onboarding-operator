@@ -43,6 +43,16 @@ jobs:
       - name: Check committed bundle matches generated output
         run: git diff --exit-code bundle/
 
+      - name: Validate catalog index build
+        env:
+          CONTAINER_TOOL: docker
+        run: |
+          VERSION="$(tr -d ' \n\r' < VERSION)"
+          BUNDLE_IMG="quay.io/tjungbau/project-onboarding-operator-bundle:v${VERSION}"
+          CATALOG_IMG="example.com/project-onboarding-operator-catalog:v${VERSION}"
+          make bundle-build BUNDLE_IMG="${BUNDLE_IMG}" CONTAINER_TOOL=docker
+          make catalog-build CATALOG_IMG="${CATALOG_IMG}" BUNDLE_IMGS="${BUNDLE_IMG}" CONTAINER_TOOL=docker PLATFORM=linux/amd64
+
   scorecard:
     name: Operator SDK scorecard
     runs-on: ubuntu-latest
@@ -69,14 +79,30 @@ jobs:
           sudo mv ./kind /usr/local/bin/kind
           kind version
 
-      - name: Prepare Kind cluster
-        run: make setup-test-e2e
-
-      - name: Run scorecard
+      - name: Prepare Kind cluster and PR operator image
+        env:
+          CONTAINER_TOOL: docker
         run: |
           go mod tidy
+          make setup-test-e2e
           VERSION="$(tr -d ' \n\r' < VERSION)"
-          make scorecard IMG="quay.io/tjungbau/project-onboarding-operator:v${VERSION}"
+          IMG="example.com/project-onboarding-operator:v${VERSION}"
+          docker build -t "${IMG}" .
+          kind load docker-image "${IMG}" --name project-onboarding-operator-test-e2e
+          kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.16.3/cert-manager.yaml
+          kubectl wait --for=condition=Available -n cert-manager deployment --all --timeout=300s
+          if ! kubectl get crd subscriptions.operators.coreos.com >/dev/null 2>&1; then
+            operator-sdk olm install --timeout 5m
+          fi
+
+      - name: Run scorecard
+        env:
+          CONTAINER_TOOL: docker
+        run: |
+          VERSION="$(tr -d ' \n\r' < VERSION)"
+          IMG="example.com/project-onboarding-operator:v${VERSION}"
+          make bundle IMG="${IMG}"
+          operator-sdk scorecard --verbose ./bundle --wait-time 300s
 
       - name: Tear down Kind cluster
         if: always()

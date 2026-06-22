@@ -113,6 +113,8 @@ vet: ## Run go vet against code.
 .PHONY: test
 test: manifests generate fmt vet setup-envtest ## Run tests.
 	KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) --bin-dir $(LOCALBIN) -p path)" go test $$(go list ./... | grep -v /e2e) -coverprofile cover.out
+	@chmod +x scripts/check-coverage.sh
+	@MIN_COVERAGE=$(or $(MIN_COVERAGE),25) scripts/check-coverage.sh cover.out
 
 # E2E tests use Kind (see tests/e2e). Override with a custom cluster by changing tests/e2e setup.
 # CertManager is installed by default; skip with CERT_MANAGER_INSTALL_SKIP=true.
@@ -331,8 +333,8 @@ bundle: generate-csv-icon manifests kustomize operator-sdk ## Generate bundle ma
 	$(KUSTOMIZE) build config/manifests --load-restrictor LoadRestrictionsNone | $(OPERATOR_SDK) generate bundle $(BUNDLE_GEN_FLAGS)
 	python3 scripts/patch-csv-spec-descriptors.py
 	python3 scripts/pin-bundle-created-at.py
-	@rm -f bundle/manifests/controller-manager-metrics-monitor_monitoring.coreos.com_v1_servicemonitor.yaml
-	@rm -f bundle/manifests/controller-manager-rules_monitoring.coreos.com_v1_prometheusrule.yaml
+	@chmod +x scripts/normalize-bundle-monitoring.sh
+	@scripts/normalize-bundle-monitoring.sh
 	@if [ -n "$(PREV_VERSION)" ]; then \
 		$(KUSTOMIZE) version --short 2>/dev/null | grep -q v5 || true; \
 		python3 -c "import pathlib,re; p=pathlib.Path('bundle/manifests/project-onboarding-operator.clusterserviceversion.yaml'); t=p.read_text(); t=re.sub(r'^  replaces:.*\n','',t,flags=re.M); t=t.replace('  version: $(VERSION)\n','  replaces: project-onboarding-operator.v$(PREV_VERSION)\n  version: $(VERSION)\n',1); p.write_text(t)"; \

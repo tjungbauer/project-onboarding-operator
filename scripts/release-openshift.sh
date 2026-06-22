@@ -2,9 +2,11 @@
 # Build, push, and optionally upgrade the operator on OpenShift via OLM.
 #
 # Usage:
-#   ./scripts/release-openshift.sh 0.0.3
-#   VERSION=0.0.3 ./scripts/release-openshift.sh
-#   UPGRADE=true ./scripts/release-openshift.sh 0.0.3
+#   ./scripts/release-openshift.sh 0.0.3              # build + push images only
+#   UPGRADE=true ./scripts/release-openshift.sh 0.0.3 # build + push + cluster upgrade
+#
+# Cluster upgrade only (images already on Quay):
+#   ./scripts/upgrade-cluster.sh 0.0.3
 #
 # Optional environment variables:
 #   QUAY_USER         default: tjungbau
@@ -13,10 +15,10 @@
 #   OPERATOR_NS       default: project-onboarding-operator
 #   CONTAINER_TOOL    default: podman
 #   PLATFORM          default: linux/amd64
-#   CHANNELS          default: alpha,stable
+#   CHANNELS          default: stable
 #   DEFAULT_CHANNEL   default: stable
-#   UPGRADE           default: false — install or upgrade via OLM when true
-#   SKIP_BUILD        default: false — skip image build (push/bundle only)
+#   UPGRADE           default: false — after build/push, run cluster upgrade (see upgrade-cluster.sh)
+#   SKIP_BUILD        default: false — skip operator image build (still builds bundle/catalog unless SKIP_CATALOG)
 #   SKIP_CATALOG      default: false — skip catalog index image (OperatorHub needs it)
 #   CATALOG_BASE_IMG  optional — previous catalog image for cumulative index (opm --from-index)
 #   CATALOG_FRESH     default: false — build catalog from scratch (no --from-index)
@@ -37,7 +39,10 @@ Usage: release-openshift.sh [<VERSION>]
 
 Examples:
   ./scripts/release-openshift.sh 0.0.3
-  UPGRADE=true ./scripts/release-openshift.sh 0.0.3
+  UPGRADE=true ./scripts/release-openshift.sh 0.0.3   # publish + upgrade cluster
+
+Cluster upgrade only (no build/push):
+  ./scripts/upgrade-cluster.sh 0.0.3
 
 Before first push:
   podman login quay.io -u tjungbau
@@ -185,7 +190,9 @@ fi
 
 echo "==> Generating OLM bundle"
 PREV_VERSION="$(semver_prev_patch "${VERSION}" 2>/dev/null || true)"
+# Resolve operator image tag to digest in the published bundle (git-committed bundle keeps tags for dev/CI drift).
 make bundle IMG="${IMG}" VERSION="${VERSION}" CHANNELS="${CHANNELS}" DEFAULT_CHANNEL="${DEFAULT_CHANNEL}" \
+  USE_IMAGE_DIGESTS=true \
   ${PREV_VERSION:+PREV_VERSION="${PREV_VERSION}"}
 
 echo "==> Building bundle image"
@@ -232,98 +239,16 @@ if [[ "${APPLY_MARKETPLACE_CATALOG}" == "true" ]]; then
 fi
 
 if [[ "${UPGRADE}" == "true" ]]; then
-  if ! command -v oc >/dev/null 2>&1; then
-    echo "error: oc not found; set UPGRADE=false to only build/push images" >&2
-    exit 1
-  fi
-
-  MARKETPLACE_NS="${MARKETPLACE_NS:-openshift-marketplace}"
-  CATALOG_NAME="${CATALOG_NAME:-project-onboarding-operator-catalog}"
-  SUB_NAME="${SUB_NAME:-project-onboarding-operator}"
-
-  if ! oc get subscription "${SUB_NAME}" -n "${OPERATOR_NS}" >/dev/null 2>&1; then
-    found_sub="$(oc get subscription -n "${OPERATOR_NS}" -o jsonpath='{range .items[?(@.spec.name=="project-onboarding-operator")]}{.metadata.name}{"\n"}{end}' 2>/dev/null | head -1)"
-    if [[ -n "${found_sub}" ]]; then
-      echo "==> Using subscription ${found_sub} (package project-onboarding-operator)"
-      SUB_NAME="${found_sub}"
-    fi
-  fi
-
-  if oc get catalogsource "${CATALOG_NAME}" -n "${OPERATOR_NS}" >/dev/null 2>&1; then
-    if ! command -v operator-sdk >/dev/null 2>&1; then
-      echo "error: operator-sdk not found" >&2
-      exit 1
-    fi
-    echo "==> Upgrading via operator-sdk (catalog ${CATALOG_NAME} in ${OPERATOR_NS})"
-    operator-sdk run bundle-upgrade "${BUNDLE_IMG}" \
-      --namespace "${OPERATOR_NS}" \
-      --timeout 10m
-  elif oc get subscription "${SUB_NAME}" -n "${OPERATOR_NS}" >/dev/null 2>&1 \
-    && oc get catalogsource "${CATALOG_NAME}" -n "${MARKETPLACE_NS}" >/dev/null 2>&1; then
-    echo "==> Upgrading via marketplace catalog (${CATALOG_NAME} in ${MARKETPLACE_NS})"
-    if [[ "${SKIP_CATALOG}" != "true" ]]; then
-      if oc get catalogsource "${CATALOG_NAME}" -n "${MARKETPLACE_NS}" >/dev/null 2>&1; then
-        oc patch catalogsource "${CATALOG_NAME}" -n "${MARKETPLACE_NS}" \
-          --type merge -p "{\"spec\":{\"image\":\"${CATALOG_IMG}\"}}"
-        oc delete pod -n "${MARKETPLACE_NS}" -l "olm.catalogSource=${CATALOG_NAME}" --ignore-not-found
-        oc wait --for=jsonpath='{.status.connectionState.lastObservedState}'=READY \
-          "catalogsource/${CATALOG_NAME}" -n "${MARKETPLACE_NS}" --timeout=5m
-      else
-        echo "==> Applying CatalogSource to ${MARKETPLACE_NS}"
-        sed "s|:v0.0.0|:v${VERSION}|g; s|quay.io/tjungbau|${REGISTRY}|g" \
-          config/openshift/catalogsource-marketplace.yaml | oc apply -f -
-      fi
-    fi
-
-    if oc get subscription "${SUB_NAME}" -n "${OPERATOR_NS}" >/dev/null 2>&1; then
-      oc patch subscription "${SUB_NAME}" -n "${OPERATOR_NS}" --type merge \
-        -p "{\"spec\":{\"startingCSV\":\"project-onboarding-operator.v${VERSION}\",\"installPlanApproval\":\"Automatic\"}}"
-    else
-      echo "error: subscription for package project-onboarding-operator not found in ${OPERATOR_NS}; install via OperatorHub first" >&2
-      exit 1
-    fi
-  elif oc get catalogsource "${CATALOG_NAME}" -n "${MARKETPLACE_NS}" >/dev/null 2>&1; then
-    if [[ "${SKIP_CATALOG}" != "true" ]]; then
-      oc patch catalogsource "${CATALOG_NAME}" -n "${MARKETPLACE_NS}" \
-        --type merge -p "{\"spec\":{\"image\":\"${CATALOG_IMG}\"}}"
-      oc delete pod -n "${MARKETPLACE_NS}" -l "olm.catalogSource=${CATALOG_NAME}" --ignore-not-found
-      oc wait --for=jsonpath='{.status.connectionState.lastObservedState}'=READY \
-        "catalogsource/${CATALOG_NAME}" -n "${MARKETPLACE_NS}" --timeout=5m
-    fi
-    echo "error: no subscription in ${OPERATOR_NS}; install via OperatorHub or operator-sdk run bundle first" >&2
-    exit 1
-  else
-    if ! command -v operator-sdk >/dev/null 2>&1; then
-      echo "error: operator-sdk not found" >&2
-      exit 1
-    fi
-    echo "==> Installing operator via OLM (first install)"
-    operator-sdk run bundle "${BUNDLE_IMG}" \
-      --namespace "${OPERATOR_NS}" \
-      --install-mode AllNamespaces \
-      --timeout 10m
-  fi
-
-  echo "==> Waiting for CSV project-onboarding-operator.v${VERSION}"
-  oc wait --for=jsonpath='{.status.phase}'=Succeeded \
-    "csv/project-onboarding-operator.v${VERSION}" \
-    -n "${OPERATOR_NS}" --timeout=10m
-
-  echo "==> Waiting for deployment rollout"
-  oc rollout status "deployment/project-onboarding-operator-controller-manager" \
-    -n "${OPERATOR_NS}" --timeout=5m
-
-  echo "==> Current CSV and image"
-  oc get csv -n "${OPERATOR_NS}" | grep project-onboarding || true
-  oc get deploy -n "${OPERATOR_NS}" \
-    -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.spec.template.spec.containers[0].image}{"\n"}{end}'
-  echo
+  echo "==> Cluster upgrade (after build/push)"
+  export VERSION QUAY_USER REGISTRY OPERATOR_NS SKIP_CATALOG
+  "${ROOT}/scripts/upgrade-cluster.sh" "${VERSION}"
 else
   echo "==> Images published."
+  echo "    Upgrade cluster (images already on Quay): ./scripts/upgrade-cluster.sh ${VERSION}"
   echo "    OperatorHub UI: see docs/operatorhub-install.md"
   echo "    Register catalog:"
   echo "      APPLY_MARKETPLACE_CATALOG=true ${0} ${VERSION}"
-  echo "    Or CLI install:"
+  echo "    Build, push, and upgrade:"
   echo "      UPGRADE=true ${0} ${VERSION}"
 fi
 

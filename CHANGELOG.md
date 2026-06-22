@@ -4,6 +4,31 @@ All notable changes to this project are documented here. Version numbers match O
 
 ## [Unreleased]
 
+## [0.0.48] - 2026-06-22
+
+### Added
+
+- `docs/upgrade.md` and `scripts/upgrade-cluster.sh` — cluster upgrade without build/push; documents operator-sdk vs OperatorHub paths.
+- `docs/ARCHITECTURE.md` — component and reconcile flow overview.
+- `docs/grafana/dashboard.json` — Grafana dashboard for operator metrics.
+- `build/hi-images.lock` and `hack/resolve-hi-digests.sh` — pin Red Hat Hardened Image base digests.
+- `scripts/check-coverage.sh` — enforce minimum unit test coverage (25%) in `make test`.
+- Scorecard integration stage: `olm-crds-deployed`, `olm-bundle-deployment`.
+- Critical Prometheus alert `ProjectOnboardingOperatorDown`.
+- API stability policy in [docs/api-design.md](docs/api-design.md).
+
+### Changed
+
+- `release-openshift.sh`: `UPGRADE=true` delegates to `upgrade-cluster.sh`; published bundle uses `USE_IMAGE_DIGESTS=true` after operator image push.
+- CI: bundle scorecard builds and loads the PR operator image into Kind; installs OLM for integration tests.
+- CI: release scorecard uses the same PR-built image as Kind E2E (not pre-published Quay).
+- CI: catalog index build validated on pull requests.
+- CI: Trivy scans operator, bundle, and catalog images (security + release workflows).
+- CI: OpenShift E2E fails on `main` / schedule when `OPENSHIFT_KUBECONFIG` is missing.
+- Expanded [SECURITY.md](SECURITY.md) with supported versions, disclosure timeline, and scope.
+- [CONTRIBUTING.md](CONTRIBUTING.md): recommended branch protection checks.
+- [docs/supply-chain.md](docs/supply-chain.md): pinned HI images and OLM digest policy.
+
 ## [0.0.47] - 2026-06-19
 
 ### Added

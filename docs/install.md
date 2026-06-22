@@ -18,6 +18,7 @@ Commands that reference `make`, `config/`, `VERSION`, or `./scripts/` assume you
 | **OpenShift OperatorHub (UI)** | [operatorhub-install.md](operatorhub-install.md) |
 | **OLM CLI** (`operator-sdk run bundle`) | [openshift-install.md](openshift-install.md) |
 | **Development** (`make deploy`) | [local-testing.md](local-testing.md) |
+| **Upgrade** (operator-sdk vs OperatorHub) | [upgrade.md](upgrade.md) |
 | **Using the operator** (CRs, console form) | [guide.md](guide.md) |
 
 After install:

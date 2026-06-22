@@ -71,6 +71,16 @@ Webhooks use OpenShift service serving certificates (`config/openshift/webhook_c
 | `v1beta1` | Storage version (preferred for new manifests) |
 | `v1alpha1` | Served; converted via conversion webhook (`/convert` on the operator webhook service) |
 
+## API stability policy
+
+| Level | Meaning for this project |
+|-------|--------------------------|
+| **OLM maturity `stable`** | Operator packaging and reconcile behaviour are production-supported; upgrades are documented in [upgrade.md](upgrade.md). |
+| **API group `onboarding.stderr.at`** | Domain is stable; breaking group renames require a new API group and migration. |
+| **`v1beta1`** | Preferred storage version. Field additions are backward-compatible. Breaking field removals or semantic changes require a deprecation period (≥ one minor release) and `CHANGELOG.md` notice. |
+| **`v1alpha1`** | Legacy served version. New features land in `v1beta1` first. `v1alpha1` may be removed after deprecation when no clients remain. |
+
+Before promoting to `v1` (if ever): publish a migration guide, run conversion tests, and bump CSV/API docs.
 
 ## GitOps / Argo CD AppProject
 

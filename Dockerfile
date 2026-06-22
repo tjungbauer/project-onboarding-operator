@@ -7,8 +7,8 @@
 # On Mac Silicon → OpenShift (amd64 workers):
 #   podman build --platform=linux/amd64 -t quay.io/<user>/project-onboarding-operator:tag .
 
-ARG HI_GO_BUILDER_IMAGE=registry.access.redhat.com/hi/go:latest-builder
-ARG HI_CORE_RUNTIME_IMAGE=registry.access.redhat.com/hi/core-runtime:latest
+ARG HI_GO_BUILDER_IMAGE=registry.access.redhat.com/hi/go@sha256:8abd3770a3fde33dfb89537a85263f8f122a778d17c6170a0a65555069bdbb7b
+ARG HI_CORE_RUNTIME_IMAGE=registry.access.redhat.com/hi/core-runtime@sha256:f1267aa4153a17e0a388415afb8838df19ceda6a326b3f181b7e311502e692f2
 
 # --- Build stage ---
 FROM ${HI_GO_BUILDER_IMAGE} AS builder

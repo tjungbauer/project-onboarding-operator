@@ -10,6 +10,19 @@ spec:
   groups:
   - name: project-onboarding-operator.rules
     rules:
+    - alert: ProjectOnboardingOperatorDown
+      annotations:
+        description: No available replicas for project-onboarding-operator-controller-manager
+          in project-onboarding-operator for 5 minutes.
+        summary: Project Onboarding operator controller is down
+      expr: |
+        kube_deployment_status_replicas_available{
+          namespace="project-onboarding-operator",
+          deployment="project-onboarding-operator-controller-manager"
+        } < 1
+      for: 5m
+      labels:
+        severity: critical
     - alert: ProjectOnboardingReconcileErrors
       annotations:
         description: The projectonboarding controller has reported reconcile errors

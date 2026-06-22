@@ -58,6 +58,9 @@ jobs:
           kind load docker-image curlimages/curl:8.12.1 --name project-onboarding-operator-test-e2e
           kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.16.3/cert-manager.yaml
           kubectl wait --for=condition=Available -n cert-manager deployment --all --timeout=300s
+          if ! kubectl get crd subscriptions.operators.coreos.com >/dev/null 2>&1; then
+            operator-sdk olm install --timeout 5m
+          fi
 
       - name: Kind E2E tests
         env:
@@ -68,15 +71,19 @@ jobs:
         run: |
           go test ./test/e2e/ -v -ginkgo.v -timeout 30m -ginkgo.skip="OpenShift test cases"
 
-      - name: Generate bundle
+      - name: Verify committed bundle
         run: |
           make bundle IMG="quay.io/tjungbau/project-onboarding-operator:v${{ steps.version.outputs.value }}"
+          git diff --exit-code bundle/
 
-      - name: Verify committed bundle
-        run: git diff --exit-code bundle/
-
-      - name: Operator SDK scorecard
-        run: operator-sdk scorecard --verbose ./bundle
+      - name: Operator SDK scorecard (PR-built image)
+        env:
+          CONTAINER_TOOL: docker
+        run: |
+          VERSION="${{ steps.version.outputs.value }}"
+          IMG="example.com/project-onboarding-operator:v${VERSION}"
+          make bundle IMG="${IMG}"
+          operator-sdk scorecard --verbose ./bundle --wait-time 300s
 
       - name: Tear down Kind cluster
         if: always()
@@ -118,6 +125,24 @@ jobs:
         uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: quay.io/tjungbau/project-onboarding-operator:v${{ steps.version.outputs.value }}
+          format: table
+          exit-code: 1
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+
+      - name: Scan pushed bundle image
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: quay.io/tjungbau/project-onboarding-operator-bundle:v${{ steps.version.outputs.value }}
+          format: table
+          exit-code: 1
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+
+      - name: Scan pushed catalog image
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: quay.io/tjungbau/project-onboarding-operator-catalog:v${{ steps.version.outputs.value }}
           format: table
           exit-code: 1
           severity: CRITICAL,HIGH

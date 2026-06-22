@@ -11,7 +11,7 @@ spec:
   - authorization:
       credentials:
         key: token
-        name: project-onboarding-operator-controller-manager-metrics-reader-token
+        name: controller-manager-metrics-reader-token
       type: Bearer
     path: /metrics
     port: https

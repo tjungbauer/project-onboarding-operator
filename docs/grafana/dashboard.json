@@ -1,0 +1,101 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": { "type": "grafana", "uid": "-- Grafana --" },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "graphTooltip": 0,
+  "panels": [
+    {
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "fieldConfig": { "defaults": { "unit": "short" } },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "id": 1,
+      "title": "Managed tenants",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "projectonboarding_tenants_total",
+          "legendFormat": "tenants"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "id": 2,
+      "title": "Reconcile errors by reason",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "sum(rate(projectonboarding_reconcile_errors_total[5m])) by (reason)",
+          "legendFormat": "{{reason}}"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "id": 3,
+      "title": "Controller reconcile errors",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "sum(rate(controller_runtime_reconcile_errors_total{controller=~\"projectonboarding|tshirtsize\"}[5m])) by (controller)",
+          "legendFormat": "{{controller}}"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "id": 4,
+      "title": "Workqueue depth",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "workqueue_depth{name=~\"projectonboarding|tshirtsize\"}",
+          "legendFormat": "{{name}}"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 16 },
+      "id": 5,
+      "title": "Operator deployment available replicas",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "kube_deployment_status_replicas_available{namespace=\"project-onboarding-operator\",deployment=\"project-onboarding-operator-controller-manager\"}",
+          "legendFormat": "available"
+        }
+      ]
+    }
+  ],
+  "schemaVersion": 39,
+  "tags": ["openshift", "operator", "project-onboarding"],
+  "templating": {
+    "list": [
+      {
+        "name": "datasource",
+        "type": "datasource",
+        "query": "prometheus",
+        "current": { "text": "Prometheus", "value": "Prometheus" }
+      }
+    ]
+  },
+  "time": { "from": "now-6h", "to": "now" },
+  "title": "Project Onboarding Operator",
+  "uid": "project-onboarding-operator",
+  "version": 1
+}

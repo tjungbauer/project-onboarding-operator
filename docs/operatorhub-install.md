@@ -100,15 +100,22 @@ oc get namespace tenant1-app-1
 
 ## Upgrade via UI
 
-1. From the repository root, push a new version (`./scripts/release-openshift.sh "${VERSION}"`). The release script builds a **cumulative** catalog index: it adds the new bundle to the previous catalog image (`opm index add --from-index …`) when `quay.io/…/project-onboarding-operator-catalog:v<previous>` exists in the registry.
-  Override when needed:
+See **[upgrade.md](upgrade.md)** (Path B: OperatorHub / marketplace catalog).
+
+Summary:
+
+1. Push a new version: `./scripts/release-openshift.sh "${VERSION}"` (cumulative catalog index when the previous catalog tag exists on Quay).
 2. Update the catalog image on the CatalogSource and restart the catalog pod:
-  ```bash
-   oc patch catalogsource project-onboarding-operator-catalog -n openshift-marketplace \
-     --type merge -p "{\"spec\":{\"image\":\"quay.io/tjungbau/project-onboarding-operator-catalog:v${VERSION}\"}}"
-   oc delete pod -n openshift-marketplace -l olm.catalogSource=project-onboarding-operator-catalog
-  ```
-3. Refresh OperatorHub. **Operators → Installed Operators** → open **Project Onboarding** → approve upgrade, or wait for automatic approval on the Subscription.
+
+```bash
+export VERSION="$(tr -d ' \n\r' < VERSION)"
+
+oc patch catalogsource project-onboarding-operator-catalog -n openshift-marketplace \
+  --type merge -p "{\"spec\":{\"image\":\"quay.io/tjungbau/project-onboarding-operator-catalog:v${VERSION}\"}}"
+oc delete pod -n openshift-marketplace -l olm.catalogSource=project-onboarding-operator-catalog
+```
+
+3. Patch the subscription or approve in **Operators → Installed Operators → Project Onboarding**. Or run `./scripts/upgrade-cluster.sh "${VERSION}"`.
 
 ## Stuck or failed upgrade
 

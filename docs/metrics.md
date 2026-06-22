@@ -57,14 +57,19 @@ oc label namespace <prometheus-namespace> metrics=enabled --overwrite
 The bundled `PrometheusRule` defines warning alerts (10–15 minute `for` windows):
 
 
-| Alert | Condition |
-| ----- | --------- |
-| `ProjectOnboardingReconcileErrors` | `controller_runtime_reconcile_errors_total{controller="projectonboarding"}` rate > 0 |
+| Alert | Severity | Condition |
+| ----- | -------- | --------- |
+| `ProjectOnboardingOperatorDown` | **critical** | `kube_deployment_status_replicas_available` for controller-manager &lt; 1 (requires kube-state-metrics) |
+| `ProjectOnboardingReconcileErrors` | warning | `controller_runtime_reconcile_errors_total{controller="projectonboarding"}` rate > 0 |
 | `ProjectOnboardingReconcileErrorsByReason` | `projectonboarding_reconcile_errors_total` rate > 0 by `reason` |
 | `ProjectOnboardingWorkqueueBacklog` | `workqueue_depth{name="projectonboarding"}` > 10 |
 | `TShirtSizeReconcileErrors` | `controller_runtime_reconcile_errors_total{controller="tshirtsize"}` rate > 0 |
 
 Ensure your Prometheus `ruleSelector` includes the operator’s `PrometheusRule` labels.
+
+## Grafana dashboard
+
+Import [grafana/dashboard.json](grafana/dashboard.json) into Grafana (Dashboards → Import). Panels cover tenant count, reconcile errors, workqueue depth, and controller deployment availability.
 
 ## Prerequisites
 

@@ -31,15 +31,59 @@ jobs:
       - name: Clone the code
         uses: actions/checkout@v4
 
-      - name: Build manager image
-        run: |
-          docker build --platform=linux/amd64 -t project-onboarding-operator:ci .
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
 
-      - name: Run Trivy vulnerability scanner
+      - name: Install operator-sdk
+        run: |
+          curl -sSL https://github.com/operator-framework/operator-sdk/releases/download/v1.42.2/operator-sdk_linux_amd64 -o operator-sdk
+          chmod +x operator-sdk
+          sudo mv operator-sdk /usr/local/bin/operator-sdk
+
+      - name: Build release images
+        env:
+          CONTAINER_TOOL: docker
+        run: |
+          VERSION="$(tr -d ' \n\r' < VERSION)"
+          echo "VERSION=${VERSION}" >> "$GITHUB_ENV"
+          docker build --platform=linux/amd64 -t "quay.io/tjungbau/project-onboarding-operator:v${VERSION}" .
+          make bundle IMG="quay.io/tjungbau/project-onboarding-operator:v${VERSION}"
+          make bundle-build BUNDLE_IMG="quay.io/tjungbau/project-onboarding-operator-bundle:v${VERSION}" CONTAINER_TOOL=docker
+          make catalog-build CATALOG_IMG="quay.io/tjungbau/project-onboarding-operator-catalog:v${VERSION}" \
+            BUNDLE_IMGS="quay.io/tjungbau/project-onboarding-operator-bundle:v${VERSION}" \
+            CONTAINER_TOOL=docker PLATFORM=linux/amd64
+
+      - name: Scan operator image
         uses: aquasecurity/trivy-action@v0.36.0
         with:
-          image-ref: project-onboarding-operator:ci
+          image-ref: quay.io/tjungbau/project-onboarding-operator:v${{ env.VERSION }}
           format: table
           exit-code: 1
           severity: CRITICAL,HIGH
           ignore-unfixed: true
+        env:
+          VERSION: ${{ env.VERSION }}
+
+      - name: Scan bundle image
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: quay.io/tjungbau/project-onboarding-operator-bundle:v${{ env.VERSION }}
+          format: table
+          exit-code: 1
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+        env:
+          VERSION: ${{ env.VERSION }}
+
+      - name: Scan catalog image
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: quay.io/tjungbau/project-onboarding-operator-catalog:v${{ env.VERSION }}
+          format: table
+          exit-code: 1
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+        env:
+          VERSION: ${{ env.VERSION }}

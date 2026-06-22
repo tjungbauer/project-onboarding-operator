@@ -79,6 +79,26 @@ SKIP_SIGN=true ./scripts/sign-release-images.sh "${VERSION}"   # SBOM only
 SKIP_SBOM=true ./scripts/sign-release-images.sh "${VERSION}"   # sign only
 ```
 
+## Pinned base images (Red Hat Hardened Images)
+
+The operator `Dockerfile` pins HI builder and runtime images **by digest** in `build/hi-images.lock`.
+
+**When to update:** Before a release, when Red Hat publishes new HI builds you want to adopt:
+
+```bash
+./hack/resolve-hi-digests.sh   # pulls :latest-builder / :latest, writes new @sha256:… into lock + Dockerfile
+git add build/hi-images.lock Dockerfile
+```
+
+You change the digest by running that script (or editing `build/hi-images.lock` and the `ARG` lines in `Dockerfile` manually). Tags like `:latest-builder` are only used as lookup inputs — builds always use the pinned `@sha256:…` references.
+
+## OLM operator image digests
+
+- **Git / PR CI:** the committed bundle uses semver **tags** (`quay.io/...:vX.Y.Z`) so `make bundle` drift checks work without registry access.
+- **Published bundle image:** `release-openshift.sh` runs `make bundle USE_IMAGE_DIGESTS=true` **after** the operator image is pushed, so the CSV on Quay references the immutable digest for that tag.
+
+To upgrade clusters, use the version tag as today (`./scripts/upgrade-cluster.sh X.Y.Z`); you do not edit digests by hand for routine upgrades.
+
 ## Optional GitHub secrets
 
 | Secret | When needed |
