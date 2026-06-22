@@ -48,7 +48,8 @@ jobs:
         run: |
           VERSION="$(tr -d ' \n\r' < VERSION)"
           echo "VERSION=${VERSION}" >> "$GITHUB_ENV"
-          docker build --platform=linux/amd64 -t "quay.io/tjungbau/project-onboarding-operator:v${VERSION}" .
+          mapfile -t HI_ARGS < <(chmod +x scripts/hi-build-args.sh && PLATFORM=linux/amd64 scripts/hi-build-args.sh)
+          docker build --platform=linux/amd64 "${HI_ARGS[@]}" -t "quay.io/tjungbau/project-onboarding-operator:v${VERSION}" .
           make bundle IMG="quay.io/tjungbau/project-onboarding-operator:v${VERSION}"
           make bundle-build BUNDLE_IMG="quay.io/tjungbau/project-onboarding-operator-bundle:v${VERSION}" CONTAINER_TOOL=docker
           make catalog-build CATALOG_IMG="quay.io/tjungbau/project-onboarding-operator-catalog:v${VERSION}" \

@@ -177,7 +177,13 @@ if [[ "${SKIP_BUILD}" != "true" ]]; then
 
   echo "==> Building operator image (${PLATFORM})"
   GIT_COMMIT="$(git -C "${ROOT}" rev-parse --short HEAD 2>/dev/null || echo unknown)"
+  HI_BUILD_ARGS=()
+  if [[ -x "${ROOT}/scripts/hi-build-args.sh" ]]; then
+    # shellcheck disable=SC2207
+    HI_BUILD_ARGS=($("${ROOT}/scripts/hi-build-args.sh"))
+  fi
   "${CONTAINER_TOOL}" build --platform="${PLATFORM}" \
+    "${HI_BUILD_ARGS[@]}" \
     --build-arg VERSION="${VERSION}" \
     --build-arg GIT_COMMIT="${GIT_COMMIT}" \
     -t "${IMG}" "${ROOT}"

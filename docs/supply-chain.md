@@ -81,16 +81,16 @@ SKIP_SBOM=true ./scripts/sign-release-images.sh "${VERSION}"   # sign only
 
 ## Pinned base images (Red Hat Hardened Images)
 
-The operator `Dockerfile` pins HI builder and runtime images **by digest** in `build/hi-images.lock`.
+CI and release builds for **linux/amd64** pin HI images by digest via `build/hi-images.lock` and `scripts/hi-build-args.sh`. The `Dockerfile` defaults to `:latest-builder` / `:latest` so local builds on other architectures still work.
 
 **When to update:** Before a release, when Red Hat publishes new HI builds you want to adopt:
 
 ```bash
-./hack/resolve-hi-digests.sh   # pulls :latest-builder / :latest, writes new @sha256:… into lock + Dockerfile
-git add build/hi-images.lock Dockerfile
+./hack/resolve-hi-digests.sh   # reads multi-arch manifests, writes linux/amd64 @sha256 into build/hi-images.lock
+git add build/hi-images.lock
 ```
 
-You change the digest by running that script (or editing `build/hi-images.lock` and the `ARG` lines in `Dockerfile` manually). Tags like `:latest-builder` are only used as lookup inputs — builds always use the pinned `@sha256:…` references.
+You do **not** edit digests by hand for routine operator upgrades — only when bumping HI base images. Operator cluster upgrades still use version tags (`./scripts/upgrade-cluster.sh X.Y.Z`).
 
 ## OLM operator image digests
 

@@ -87,7 +87,8 @@ jobs:
           make setup-test-e2e
           VERSION="$(tr -d ' \n\r' < VERSION)"
           IMG="example.com/project-onboarding-operator:v${VERSION}"
-          docker build -t "${IMG}" .
+          mapfile -t HI_ARGS < <(chmod +x scripts/hi-build-args.sh && PLATFORM=linux/amd64 scripts/hi-build-args.sh)
+          docker build --platform=linux/amd64 "${HI_ARGS[@]}" -t "${IMG}" .
           kind load docker-image "${IMG}" --name project-onboarding-operator-test-e2e
           kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.16.3/cert-manager.yaml
           kubectl wait --for=condition=Available -n cert-manager deployment --all --timeout=300s

@@ -52,7 +52,8 @@ jobs:
           make setup-test-e2e
           VERSION="${{ steps.version.outputs.value }}"
           IMG="example.com/project-onboarding-operator:v${VERSION}"
-          docker build -t "${IMG}" .
+          mapfile -t HI_ARGS < <(chmod +x scripts/hi-build-args.sh && PLATFORM=linux/amd64 scripts/hi-build-args.sh)
+          docker build --platform=linux/amd64 "${HI_ARGS[@]}" -t "${IMG}" .
           kind load docker-image "${IMG}" --name project-onboarding-operator-test-e2e
           docker pull curlimages/curl:8.12.1
           kind load docker-image curlimages/curl:8.12.1 --name project-onboarding-operator-test-e2e

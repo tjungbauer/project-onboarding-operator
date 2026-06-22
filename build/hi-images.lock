@@ -1,5 +1,6 @@
-# Red Hat Hardened Images — pinned by digest for reproducible builds.
-# Update before a release when RH publishes new HI builds:
+# Red Hat Hardened Images — platform-specific digests for reproducible linux/amd64 CI/release builds.
+# Default Dockerfile ARGs use :latest-builder / :latest for local multi-arch builds.
+# Update when adopting new HI builds:
 #   ./hack/resolve-hi-digests.sh
-HI_GO_BUILDER_IMAGE=registry.access.redhat.com/hi/go@sha256:8abd3770a3fde33dfb89537a85263f8f122a778d17c6170a0a65555069bdbb7b
-HI_CORE_RUNTIME_IMAGE=registry.access.redhat.com/hi/core-runtime@sha256:f1267aa4153a17e0a388415afb8838df19ceda6a326b3f181b7e311502e692f2
+HI_GO_BUILDER_IMAGE_LINUX_AMD64=registry.access.redhat.com/hi/go@sha256:70e45d93486e21e0c1ba0f447bddf1c5500ebde7c985da6e17ab68b5042eaf99
+HI_CORE_RUNTIME_IMAGE_LINUX_AMD64=registry.access.redhat.com/hi/core-runtime@sha256:cecb8ceb5ef3fd5eb181a96b4afb01e2a90b3d1ff127dab810532e8de31bc9c7
